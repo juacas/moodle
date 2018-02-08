@@ -1,95 +1,95 @@
 <?php
 
 /*
-================================================================================
+ ================================================================================
 
-EvalMath - PHP Class to safely evaluate math expressions
-Copyright (C) 2005 Miles Kaufmann <http://www.twmagic.com/>
+ EvalMath - PHP Class to safely evaluate math expressions
+ Copyright (C) 2005 Miles Kaufmann <http://www.twmagic.com/>
 
-================================================================================
+ ================================================================================
 
-NAME
-    EvalMath - safely evaluate math expressions
+ NAME
+ EvalMath - safely evaluate math expressions
 
-SYNOPSIS
-    <?
-      include('evalmath.class.php');
-      $m = new EvalMath;
-      // basic evaluation:
-      $result = $m->evaluate('2+2');
-      // supports: order of operation; parentheses; negation; built-in functions
-      $result = $m->evaluate('-8(5/2)^2*(1-sqrt(4))-8');
-      // create your own variables
-      $m->evaluate('a = e^(ln(pi))');
-      // or functions
-      $m->evaluate('f(x,y) = x^2 + y^2 - 2x*y + 1');
-      // and then use them
-      $result = $m->evaluate('3*f(42,a)');
-    ?>
+ SYNOPSIS
+ <?
+ include('evalmath.class.php');
+ $m = new EvalMath;
+ // basic evaluation:
+ $result = $m->evaluate('2+2');
+ // supports: order of operation; parentheses; negation; built-in functions
+ $result = $m->evaluate('-8(5/2)^2*(1-sqrt(4))-8');
+ // create your own variables
+ $m->evaluate('a = e^(ln(pi))');
+ // or functions
+ $m->evaluate('f(x,y) = x^2 + y^2 - 2x*y + 1');
+ // and then use them
+ $result = $m->evaluate('3*f(42,a)');
+ ?>
 
-DESCRIPTION
-    Use the EvalMath class when you want to evaluate mathematical expressions
-    from untrusted sources.  You can define your own variables and functions,
-    which are stored in the object.  Try it, it's fun!
+ DESCRIPTION
+ Use the EvalMath class when you want to evaluate mathematical expressions
+ from untrusted sources.  You can define your own variables and functions,
+ which are stored in the object.  Try it, it's fun!
 
-METHODS
-    $m->evalute($expr)
-        Evaluates the expression and returns the result.  If an error occurs,
-        prints a warning and returns false.  If $expr is a function assignment,
-        returns true on success.
+ METHODS
+ $m->evalute($expr)
+ Evaluates the expression and returns the result.  If an error occurs,
+ prints a warning and returns false.  If $expr is a function assignment,
+ returns true on success.
 
-    $m->e($expr)
-        A synonym for $m->evaluate().
+ $m->e($expr)
+ A synonym for $m->evaluate().
 
-    $m->vars()
-        Returns an associative array of all user-defined variables and values.
+ $m->vars()
+ Returns an associative array of all user-defined variables and values.
 
-    $m->funcs()
-        Returns an array of all user-defined functions.
+ $m->funcs()
+ Returns an array of all user-defined functions.
 
-PARAMETERS
-    $m->suppress_errors
-        Set to true to turn off warnings when evaluating expressions
+ PARAMETERS
+ $m->suppress_errors
+ Set to true to turn off warnings when evaluating expressions
 
-    $m->last_error
-        If the last evaluation failed, contains a string describing the error.
-        (Useful when suppress_errors is on).
+ $m->last_error
+ If the last evaluation failed, contains a string describing the error.
+ (Useful when suppress_errors is on).
 
-AUTHOR INFORMATION
-    Copyright 2005, Miles Kaufmann.
+ AUTHOR INFORMATION
+ Copyright 2005, Miles Kaufmann.
 
-LICENSE
-    Redistribution and use in source and binary forms, with or without
-    modification, are permitted provided that the following conditions are
-    met:
+ LICENSE
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are
+ met:
 
-    1   Redistributions of source code must retain the above copyright
-        notice, this list of conditions and the following disclaimer.
-    2.  Redistributions in binary form must reproduce the above copyright
-        notice, this list of conditions and the following disclaimer in the
-        documentation and/or other materials provided with the distribution.
-    3.  The name of the author may not be used to endorse or promote
-        products derived from this software without specific prior written
-        permission.
+ 1   Redistributions of source code must retain the above copyright
+ notice, this list of conditions and the following disclaimer.
+ 2.  Redistributions in binary form must reproduce the above copyright
+ notice, this list of conditions and the following disclaimer in the
+ documentation and/or other materials provided with the distribution.
+ 3.  The name of the author may not be used to endorse or promote
+ products derived from this software without specific prior written
+ permission.
 
-    THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
-    IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-    WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-    DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
-    INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-    (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
-    SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
-    HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
-    STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
-    ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
-    POSSIBILITY OF SUCH DAMAGE.
+ THIS SOFTWARE IS PROVIDED BY THE AUTHOR ``AS IS'' AND ANY EXPRESS OR
+ IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE AUTHOR BE LIABLE FOR ANY DIRECT,
+ INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+ SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION)
+ HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT,
+ STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN
+ ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
+ POSSIBILITY OF SUCH DAMAGE.
 
-*/
+ */
 
 /**
  * This class was heavily modified in order to get usefull spreadsheet emulation ;-)
  * skodak
- *
+ * This class was modified to allow comparison operators and synonyms functions (for if function).
  */
 
 class EvalMath {
@@ -113,7 +113,8 @@ class EvalMath {
         'average'=>array(-1), 'max'=>array(-1),  'min'=>array(-1),
         'mod'=>array(2),      'pi'=>array(0),    'power'=>array(2),
         'round'=>array(1, 2), 'sum'=>array(-1), 'rand_int'=>array(2),
-        'rand_float'=>array(0));
+        'rand_float'=>array(0), 'ifthenelse'=>array(3));
+    var $fcsynonyms = array('if' => 'ifthenelse');
 
     var $allowimplicitmultiplication;
 
@@ -152,8 +153,8 @@ class EvalMath {
             if (($tmp = $this->pfx($this->nfx($matches[2]))) === false) return false; // get the result and make sure it's good
             $this->v[$matches[1]] = $tmp; // if so, stick it in the variable array
             return $this->v[$matches[1]]; // and return the resulting value
-        //===============
-        // is it a function assignment?
+            //===============
+            // is it a function assignment?
         } elseif (preg_match('/^\s*('.self::$namepat.')\s*\(\s*('.self::$namepat.'(?:\s*,\s*'.self::$namepat.')*)\s*\)\s*=\s*(.+)$/', $expr, $matches)) {
             $fnn = $matches[1]; // get the function name
             if (in_array($matches[1], $this->fb)) { // make sure it isn't built in
@@ -173,7 +174,7 @@ class EvalMath {
             }
             $this->f[$fnn] = array('args'=>$args, 'func'=>$stack);
             return true;
-        //===============
+            //===============
         } else {
             return $this->pfx($this->nfx($expr)); // straight up evaluation, woo
         }
@@ -187,7 +188,7 @@ class EvalMath {
         $output = array();
         foreach ($this->f as $fnn=>$dat)
             $output[] = $fnn . '(' . implode(',', $dat['args']) . ')';
-        return $output;
+            return $output;
     }
 
     /**
@@ -207,20 +208,25 @@ class EvalMath {
         $stack = new EvalMathStack;
         $output = array(); // postfix form of expression, to be passed to pfx()
         $expr = trim(strtolower($expr));
-
-        $ops   = array('+', '-', '*', '/', '^', '_');
+        // MDL-14274: new operators for comparison added.
+        $ops   = array('+', '-', '*', '/', '^', '_', '>', '<', '<=', '>=', '==');
         $ops_r = array('+'=>0,'-'=>0,'*'=>0,'/'=>0,'^'=>1); // right-associative operator?
-        $ops_p = array('+'=>0,'-'=>0,'*'=>1,'/'=>1,'_'=>1,'^'=>2); // operator precedence
+        $ops_p = array('+'=>0,'-'=>0,'*'=>1,'/'=>1,'_'=>1,'^'=>2, '>'=>3, '<'=>3, '<='=>3, '>='=>3, '=='=>3); // operator precedence
 
         $expecting_op = false; // we use this in syntax-checking the expression
-                               // and determining when a - is a negation
+        // and determining when a - is a negation
 
-        if (preg_match("/[^\w\s+*^\/()\.,-]/", $expr, $matches)) { // make sure the characters are all good
+        if (preg_match("/[^\w\s+*^\/()\.,-<>=]/", $expr, $matches)) { // make sure the characters are all good
             return $this->trigger(get_string('illegalcharactergeneral', 'mathslib', $matches[0]));
         }
 
         while(1) { // 1 Infinite Loop ;)
-            $op = substr($expr, $index, 1); // get the first character at the current index
+            // MDL-14274 Test two character operators.
+            $op = substr($expr, $index, 2);
+            if (!in_array($op, $ops)) {
+                // MDL-14274 Get one character operator.
+                $op = substr($expr, $index, 1); // get the first character at the current index
+            }
             // find out if we're currently at the beginning of a number/variable/function/parenthesis/operand
             $ex = preg_match('/^('.self::$namepat.'\(?|\d+(?:\.\d*)?(?:(e[+-]?)\d*)?|\.\d+|\()/', substr($expr, $index), $match);
             //===============
@@ -229,7 +235,7 @@ class EvalMath {
                 $index++;
             } elseif ($op == '_') { // we have to explicitly deny this, because it's legal on the stack
                 return $this->trigger(get_string('illegalcharacterunderscore', 'mathslib')); // but not in the input expression
-            //===============
+                //===============
             } elseif ((in_array($op, $ops) or $ex) and $expecting_op) { // are we putting an operator on the stack?
                 if ($ex) { // are we expecting an operator but have a number/variable/function/opening parethesis?
                     if (!$this->allowimplicitmultiplication){
@@ -245,9 +251,9 @@ class EvalMath {
                 }
                 // many thanks: http://en.wikipedia.org/wiki/Reverse_Polish_notation#The_algorithm_in_detail
                 $stack->push($op); // finally put OUR operator onto the stack
-                $index++;
+                $index += strlen($op);
                 $expecting_op = false;
-            //===============
+                //===============
             } elseif ($op == ')' and $expecting_op) { // ready to close a parenthesis?
                 while (($o2 = $stack->pop()) != '(') { // pop off the stack back to the last (
                     if (is_null($o2)) return $this->trigger(get_string('unexpectedclosingbracket', 'mathslib'));
@@ -265,7 +271,9 @@ class EvalMath {
                             $a->given = $arg_count;
                             return $this->trigger(get_string('wrongnumberofarguments', 'mathslib', $a));
                         }
-                    } elseif (array_key_exists($fnn, $this->fc)) {
+                    } elseif ($this->get_native_function_name($fnn)) {
+                        $fnn = $this->get_native_function_name($fnn); // Resolve synonyms.
+
                         $counts = $this->fc[$fnn];
                         if (in_array(-1, $counts) and $arg_count > 0) {}
                         elseif (!in_array($arg_count, $counts)) {
@@ -286,7 +294,7 @@ class EvalMath {
                     }
                 }
                 $index++;
-            //===============
+                //===============
             } elseif ($op == ',' and $expecting_op) { // did we just finish a function argument?
                 while (($o2 = $stack->pop()) != '(') {
                     if (is_null($o2)) return $this->trigger(get_string('unexpectedcomma', 'mathslib')); // oops, never had a (
@@ -309,11 +317,13 @@ class EvalMath {
                 $expecting_op = true;
                 $val = $match[1];
                 if (preg_match('/^('.self::$namepat.')\($/', $val, $matches)) { // may be func, or variable w/ implicit multiplication against parentheses...
-                    if (in_array($matches[1], $this->fb) or array_key_exists($matches[1], $this->f) or array_key_exists($matches[1], $this->fc)) { // it's a func
-                        $stack->push($val);
-                        $stack->push(1);
-                        $stack->push('(');
-                        $expecting_op = false;
+                    if (in_array($matches[1], $this->fb) or
+                            array_key_exists($matches[1], $this->f) or
+                            $this->get_native_function_name($matches[1])){ // it's a func
+                                $stack->push($val);
+                                $stack->push(1);
+                                $stack->push('(');
+                                $expecting_op = false;
                     } else { // it's a var w/ implicit multiplication
                         $val = $matches[1];
                         $output[] = $val;
@@ -331,6 +341,7 @@ class EvalMath {
                     $stack->pop();// 1
                     $fn = $stack->pop();
                     $fnn = $matches[1]; // get the function name
+                    $fnn = $this->get_native_function_name($fnn); // Resolve synonyms.
                     $counts = $this->fc[$fnn];
                     if (!in_array(0, $counts)){
                         $a= new stdClass();
@@ -368,7 +379,20 @@ class EvalMath {
         }
         return $output;
     }
-
+    /**
+     *
+     * @param string $fnn
+     * @return string|boolean false if function name unknown.
+     */
+    function get_native_function_name($fnn) {
+        if (array_key_exists($fnn, $this->fcsynonyms)) {
+            return $this->fcsynonyms[$fnn];
+        } else if (array_key_exists($fnn, $this->fc)) {
+            return $fnn;
+        } else {
+            return false;
+        }
+    }
     // evaluate postfix notation
     function pfx($tokens, $vars = array()) {
 
@@ -387,7 +411,8 @@ class EvalMath {
                     $fnn = preg_replace("/^arc/", "a", $fnn); // for the 'arc' trig synonyms
                     if ($fnn == 'ln') $fnn = 'log';
                     eval('$stack->push(' . $fnn . '($op1));'); // perfectly safe eval()
-                } elseif (array_key_exists($fnn, $this->fc)) { // calc emulation function
+                } elseif ($this->get_native_function_name($fnn)) { // calc emulation function
+                    $fnn = $this->get_native_function_name($fnn); // Resolve synonyms.
                     // get args
                     $args = array();
                     for ($i = $count-1; $i >= 0; $i--) {
@@ -407,7 +432,7 @@ class EvalMath {
                     $stack->push($this->pfx($this->f[$fnn]['func'], $args)); // yay... recursion!!!!
                 }
             // if the token is a binary operator, pop two values off the stack, do the operation, and push the result back on
-            } elseif (in_array($token, array('+', '-', '*', '/', '^'), true)) {
+            } elseif (in_array($token, array('+', '-', '*', '/', '^', '>', '<', '==', '<=', '>='), true)) {
                 if (is_null($op2 = $stack->pop())) return $this->trigger(get_string('internalerror', 'mathslib'));
                 if (is_null($op1 = $stack->pop())) return $this->trigger(get_string('internalerror', 'mathslib'));
                 switch ($token) {
@@ -422,6 +447,16 @@ class EvalMath {
                         $stack->push($op1/$op2); break;
                     case '^':
                         $stack->push(pow($op1, $op2)); break;
+                    case '>':
+                        $stack->push((int)($op1 > $op2)); break;
+                    case '<':
+                        $stack->push((int)($op1 < $op2)); break;
+                    case '==':
+                        $stack->push((int)($op1 == $op2)); break;
+                    case '<=':
+                        $stack->push((int)($op1 <= $op2)); break;
+                    case '>=':
+                        $stack->push((int)($op1 >= $op2)); break;
                 }
             // if the token is a unary operator, pop one value off the stack, do the operation, and push it back on
             } elseif ($token == "_") {
@@ -483,7 +518,21 @@ class EvalMathStack {
 
 // spreadsheet functions emulation
 class EvalMathFuncs {
-
+    /**
+     * MDL-14274 new conditional function.
+     * @param boolean $condition boolean for conditional.
+     * @param variant $then value if condition is true.
+     * @param unknown $else value if condition is false.
+     * @author Juan Pablo de Castro <juan.pablo.de.castro@gmail.com>
+     * @return unknown
+     */
+    static function ifthenelse($condition, $then, $else) {
+        if ($condition == true) {
+            return $then;
+        } else {
+            return $else;
+        }
+    }
     static function average() {
         $args = func_get_args();
         return (call_user_func_array(array('self', 'sum'), $args) / count($args));
@@ -531,7 +580,7 @@ class EvalMathFuncs {
         $args = func_get_args();
         $res = 0;
         foreach($args as $a) {
-           $res += $a;
+            $res += $a;
         }
         return $res;
     }
