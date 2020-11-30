@@ -30,6 +30,9 @@ require_once($CFG->libdir.'/formslib.php');
 
 define('FEEDBACK_ANONYMOUS_YES', 1);
 define('FEEDBACK_ANONYMOUS_NO', 2);
+// JPC anon
+define('FEEDBACK_ANONYMOUS_TRULLY', 3);
+// JPC
 define('FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP', 2);
 define('FEEDBACK_DECIMAL', '.');
 define('FEEDBACK_THOUSAND', ',');
@@ -217,7 +220,7 @@ function feedback_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
         if (isset($CFG->feedback_allowfullanonymous)
                     AND $CFG->feedback_allowfullanonymous
                     AND $course->id == SITEID
-                    AND $feedback->anonymous == FEEDBACK_ANONYMOUS_YES ) {
+                    AND $feedback->anonymous != FEEDBACK_ANONYMOUS_NO ) {
             $canload = true;
         }
 
@@ -1901,7 +1904,6 @@ function feedback_set_tmp_values($feedbackcompleted) {
  */
 function feedback_save_tmp_values($feedbackcompletedtmp, $feedbackcompleted) {
     global $DB;
-
     $tmpcplid = $feedbackcompletedtmp->id;
     if ($feedbackcompleted) {
         //first drop all existing values
@@ -1918,6 +1920,10 @@ function feedback_save_tmp_values($feedbackcompletedtmp, $feedbackcompleted) {
 
     $allitems = $DB->get_records('feedback_item', array('feedback' => $feedbackcompleted->feedback));
 
+// JPC Anon
+    $params = array('id'=>$feedbackcompleted->feedback);
+    $fullanon = $DB->get_field('feedback', 'anonymous', $params) == FEEDBACK_ANONYMOUS_TRULLY;
+// JPC end
     //save all the new values from feedback_valuetmp
     //get all values of tmp-completed
     $params = array('completed'=>$feedbackcompletedtmp->id);
@@ -1949,14 +1955,42 @@ function feedback_save_tmp_values($feedbackcompletedtmp, $feedbackcompleted) {
         if ($check) {
             unset($value->id);
             $value->completed = $feedbackcompleted->id;
-            $DB->insert_record('feedback_value', $value);
+            $value->id = $DB->insert_record('feedback_value', $value);
+// JPC anon (Decorrelation code bellow #1972)
+	    // if ($fullanon) {
+        //     $value->completed = -$value->id; // Clear trazability fo anonymity. Use negative Ids to avoid uniqueness conflict.
+        //     $DB->update_record('feedback_value', $value);
+        //     }
+// JPC end
         }
     }
     //drop all the tmpvalues
     $DB->delete_records('feedback_valuetmp', array('completed'=>$tmpcplid));
     $DB->delete_records('feedback_completedtmp', array('id'=>$tmpcplid));
+// JPC anon
+// Decorrelation Phase: Shuffle the ordering and break completion FK of mdl_feedback_value
+    if ($fullanon) {
+        /** @global moodle_database $DB */
+        $trans = $DB->start_delegated_transaction();
+        list($idsql, $idparams) = $DB->get_in_or_equal(array_keys($allitems), SQL_PARAMS_NAMED);
+        $sql = "SELECT * FROM {feedback_value} v WHERE v.item ".$idsql;
+        $values = $DB->get_records_sql($sql, $idparams);
+        // Reassign ids to de-correlate ordering.
+        $valkeys = array_keys($values);
+        shuffle($values);
+        // After shuffle, keys are numbered from 0 to N.
+        foreach ($values as $key => $value) {
+            $value->id = $valkeys[$key];
+            // Clear trazability for anonymity. Use negative Ids to avoid uniqueness conflict.
+            $value->completed = - $value->id;
+        }
+        $DB->delete_records_list('feedback_value', 'id', $valkeys);
+        $DB->insert_records('feedback_value', $values);
+        $trans->allow_commit();
+    }
 
-    // Trigger event for the delete action we performed.
+// JPC end
+// Trigger event for the delete action we performed.
     $cm = get_coursemodule_from_instance('feedback', $feedbackcompleted->feedback);
     $event = \mod_feedback\event\response_submitted::create_from_record($feedbackcompleted, $cm);
     $event->trigger();
@@ -2206,7 +2240,8 @@ function feedback_get_group_values($item,
         }
     }
     $params = array('id'=>$item->feedback);
-    if ($DB->get_field('feedback', 'anonymous', $params) == FEEDBACK_ANONYMOUS_YES) {
+// JPC Anon
+    if ($DB->get_field('feedback', 'anonymous', $params) != FEEDBACK_ANONYMOUS_NO) {
         if (is_array($values)) {
             shuffle($values);
         }

@@ -51,6 +51,10 @@ $feedback = $PAGE->activityrecord;
 
 require_capability('mod/feedback:viewreports', $context);
 
+if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY) { // JPC: Should not be here!
+    print_error('trully_anonymous','feedback');
+}
+
 if ($deleteid) {
     // This is a request to delete a reponse.
     require_capability('mod/feedback:deletesubmissions', $context);
@@ -160,4 +164,3 @@ if ($userid || $showcompleted) {
 
 // Finish the page.
 echo $OUTPUT->footer();
-

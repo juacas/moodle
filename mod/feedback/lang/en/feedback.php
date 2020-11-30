@@ -29,6 +29,7 @@ $string['after_submit'] = 'After submission';
 $string['allowfullanonymous'] = 'Allow full anonymous';
 $string['analysis'] = 'Analysis';
 $string['anonymous'] = 'Anonymous';
+$string['trully_anonymous'] = 'Responses are fully uncorrelated in database and listing';
 $string['anonymous_edit'] = 'Record user names';
 $string['anonymous_entries'] = 'Anonymous entries ({$a})';
 $string['anonymous_user'] = 'Anonymous user';

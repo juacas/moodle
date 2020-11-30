@@ -75,7 +75,7 @@ echo $OUTPUT->render_from_template('mod_feedback/summary', $summary->export_for_
 $items = $feedbackstructure->get_items(true);
 
 $check_anonymously = true;
-if ($mygroupid > 0 AND $feedback->anonymous == FEEDBACK_ANONYMOUS_YES) {
+if ($mygroupid > 0 AND $feedback->anonymous != FEEDBACK_ANONYMOUS_NO) { //JPC
     $completedcount = $feedbackstructure->count_completed_responses($mygroupid);
     if ($completedcount < FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
         $check_anonymously = false;
@@ -98,4 +98,3 @@ if ($check_anonymously) {
 echo '</div>';
 
 echo $OUTPUT->footer();
-
