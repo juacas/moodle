@@ -62,7 +62,7 @@ class course_module_viewed extends \core\event\course_module_viewed {
         $event = self::create(array(
             'objectid' => $feedback->id,
             'context' => \context_module::instance($cm->id),
-            'anonymous' => ($feedback->anonymous == FEEDBACK_ANONYMOUS_YES),
+            'anonymous' => ($feedback->anonymous != FEEDBACK_ANONYMOUS_NO), // JPC
             'other' => array(
                 'anonymous' => $feedback->anonymous // Deprecated.
             )
@@ -131,4 +131,3 @@ class course_module_viewed extends \core\event\course_module_viewed {
         return false;
     }
 }
-

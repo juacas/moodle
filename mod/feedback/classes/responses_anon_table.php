@@ -69,12 +69,12 @@ class mod_feedback_responses_anon_table extends mod_feedback_responses_table {
         $this->set_attribute('id', 'showentryanontable');
 
         $params = ['instance' => $cm->instance,
-            'anon' => FEEDBACK_ANONYMOUS_YES,
+            'anon' => FEEDBACK_ANONYMOUS_YES, //JPC
             'courseid' => $this->feedbackstructure->get_courseid()];
 
         $fields = 'c.id, c.random_response, c.courseid';
         $from = '{feedback_completed} c';
-        $where = 'c.anonymous_response = :anon AND c.feedback = :instance';
+        $where = 'c.anonymous_response = :anon AND c.feedback = :instance'; //JPC
         if ($this->feedbackstructure->get_courseid()) {
             $where .= ' AND c.courseid = :courseid';
         }
