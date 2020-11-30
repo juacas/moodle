@@ -68,7 +68,7 @@ class response_deleted extends \core\event\base {
             'objectid' => $completed->id,
             'courseid' => $cm->course,
             'context' => \context_module::instance($cm->id),
-            'anonymous' => ($completed->anonymous_response == FEEDBACK_ANONYMOUS_YES),
+            'anonymous' => ($completed->anonymous_response != FEEDBACK_ANONYMOUS_NO), // JPC
             'other' => array(
                 'cmid' => $cm->id,
                 'instanceid' => $feedback->id,
@@ -165,4 +165,3 @@ class response_deleted extends \core\event\base {
         return $othermapped;
     }
 }
-

@@ -181,7 +181,7 @@ class mod_feedback_structure {
      * @return bool
      */
     public function is_anonymous() {
-        return $this->feedback->anonymous == FEEDBACK_ANONYMOUS_YES;
+        return $this->feedback->anonymous != FEEDBACK_ANONYMOUS_NO; // JPC
     }
 
     /**
