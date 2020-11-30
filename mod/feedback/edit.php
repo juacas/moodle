@@ -159,10 +159,13 @@ if ($do_show == 'templates') {
 
 if ($do_show == 'edit') {
     // Print the Item-Edit-section.
-
+    $options = feedback_load_feedback_items_options();
+    if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY ) {
+        unset($options['pagebreak']); // JPC forbid pagebreaks because it uses feedback_completed_tmp table between submissions.
+    }
     $select = new single_select(new moodle_url('/mod/feedback/edit_item.php',
             array('cmid' => $id, 'position' => $lastposition, 'sesskey' => sesskey())),
-        'typ', feedback_load_feedback_items_options());
+        'typ', $options);
     $select->label = get_string('add_item', 'mod_feedback');
     echo $OUTPUT->render($select);
 
