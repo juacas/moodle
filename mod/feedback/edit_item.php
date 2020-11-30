@@ -50,6 +50,9 @@ $context = context_module::instance($cm->id);
 require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 
+$feedbackstructure = new mod_feedback_structure($feedback, $cm);
+$feedbacklocked = $feedbackstructure->is_locked();
+
 $editurl = new moodle_url('/mod/feedback/edit.php', array('id' => $cm->id));
 
 $PAGE->set_url($url);
@@ -113,7 +116,11 @@ require('tabs.php');
 if (isset($error)) {
     echo $error;
 }
-$itemobj->show_editform();
+if ($feedbacklocked == false) {
+    $itemobj->show_editform();
+} else {
+    echo $OUTPUT->heading(get_string('feedbacklocked', 'feedback'));
+}
 
 /// Finish the page
 ///////////////////////////////////////////////////////////////////////////

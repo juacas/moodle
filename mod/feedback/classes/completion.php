@@ -643,7 +643,7 @@ class mod_feedback_completion extends mod_feedback_structure {
 
         if (!empty($CFG->feedback_allowfullanonymous)
                     AND $this->feedback->course == SITEID
-                    AND $this->feedback->anonymous == FEEDBACK_ANONYMOUS_YES
+                    AND $this->feedback->anonymous != FEEDBACK_ANONYMOUS_NO // JPC
                     AND ((!isloggedin() && $USER->id == $this->userid) || isguestuser($this->userid))) {
             // Guests are allowed to complete fully anonymous feedback without having 'mod/feedback:complete' capability.
             return true;

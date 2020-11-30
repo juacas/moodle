@@ -824,7 +824,7 @@ class mod_feedback_external extends external_api {
         $summarydata = $summary->export_for_template($PAGE->get_renderer('core'));
 
         $checkanonymously = true;
-        if ($groupid > 0 AND $feedback->anonymous == FEEDBACK_ANONYMOUS_YES) {
+        if ($groupid > 0 AND $feedback->anonymous != FEEDBACK_ANONYMOUS_NO) { // JPC
             $completedcount = $feedbackstructure->count_completed_responses($groupid);
             if ($completedcount < FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
                 $checkanonymously = false;

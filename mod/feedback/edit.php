@@ -49,6 +49,7 @@ require_login($course, false, $cm);
 require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 $feedbackstructure = new mod_feedback_structure($feedback, $cm);
+$feedbacklocked = $feedbackstructure->is_locked();
 
 if ($switchitemrequired) {
     require_sesskey();
@@ -59,10 +60,10 @@ if ($switchitemrequired) {
     redirect($url);
 }
 
-if ($deleteitem) {
+if ( $deleteitem) {
     require_sesskey();
     $items = $feedbackstructure->get_items();
-    if (isset($items[$deleteitem])) {
+    if ($feedbacklocked === false && isset($items[$deleteitem])) {
         feedback_delete_item($deleteitem);
     }
     redirect($url);
@@ -134,7 +135,9 @@ require('tabs.php');
 
 if ($do_show == 'templates') {
     // Print the template-section.
-    $use_template_form->display();
+    if ($feedbacklocked == false) { // Hide template selection if locked.
+        $use_template_form->display();
+    }
 
     if ($cancreatetemplates) {
         $deleteurl = new moodle_url('/mod/feedback/delete_template.php', array('id' => $id));
@@ -151,24 +154,34 @@ if ($do_show == 'templates') {
         $exporturl = new moodle_url('/mod/feedback/export.php', $urlparams);
         $importurl = new moodle_url('/mod/feedback/import.php', array('id'=>$id));
         echo '<p>
-            <a href="'.$exporturl->out().'">'.get_string('export_questions', 'feedback').'</a>/
-            <a href="'.$importurl->out().'">'.get_string('import_questions', 'feedback').'</a>
-        </p>';
+            <a href="'.$exporturl->out().'">'.get_string('export_questions', 'feedback').'</a>';
+        if ($feedbacklocked == false) {
+            echo '<a href="'.$importurl->out().'">'.get_string('import_questions', 'feedback').'</a>';
+        }
+        echo '</p>';
     }
 }
 
 if ($do_show == 'edit') {
     // Print the Item-Edit-section.
-
-    $select = new single_select(new moodle_url('/mod/feedback/edit_item.php',
+    if ($feedbacklocked == false) {
+        $options = feedback_load_feedback_items_options();
+        if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY ) {
+            unset($options['pagebreak']); // JPC forbid pagebreaks because it uses feedback_completed_tmp table between submissions.
+        }
+        $select = new single_select(new moodle_url('/mod/feedback/edit_item.php',
             array('cmid' => $id, 'position' => $lastposition, 'sesskey' => sesskey())),
-        'typ', feedback_load_feedback_items_options());
-    $select->label = get_string('add_item', 'mod_feedback');
-    echo $OUTPUT->render($select);
+            'typ', $options);
+        $select->label = get_string('add_item', 'mod_feedback');
+    // Hide edition if locked.
+        echo $OUTPUT->render($select);
+        $formmode = mod_feedback_complete_form::MODE_EDIT;
+    } else {
+        echo $OUTPUT->heading(get_string('feedbacklocked', 'feedback'));
+        $formmode = mod_feedback_complete_form::MODE_PRINT;
+    }
 
-
-    $form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_EDIT,
-            $feedbackstructure, 'feedback_edit_form');
+    $form = new mod_feedback_complete_form($formmode, $feedbackstructure, 'feedback_edit_form');
     echo '<div id="feedback_dragarea">'; // The container for the dragging area.
     $form->display();
     echo '</div>';

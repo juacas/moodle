@@ -71,10 +71,12 @@ if (has_capability('mod/feedback:viewreports', $context)) {
     }
     $row[] = new tabobject('analysis', $analysisurl->out(), get_string('analysis', 'feedback'));
 
-    $reporturl = new moodle_url('/mod/feedback/show_entries.php', $urlparams);
-    $row[] = new tabobject('showentries',
-                            $reporturl->out(),
-                            get_string('show_entries', 'feedback'));
+    if ($feedback->anonymous != FEEDBACK_ANONYMOUS_TRULLY) { // JPC: Items are uncorrelated to answers.
+        $reporturl = new moodle_url('/mod/feedback/show_entries.php', $urlparams);
+        $row[] = new tabobject('showentries',
+                                $reporturl->out(),
+                                get_string('show_entries', 'feedback'));
+    }
 
     if ($feedback->anonymous == FEEDBACK_ANONYMOUS_NO AND $feedback->course != SITEID) {
         $nonrespondenturl = new moodle_url('/mod/feedback/show_nonrespondents.php', $urlparams);
@@ -89,4 +91,3 @@ if (count($row) > 1) {
 
     print_tabs($tabs, $current_tab, $inactive, $activated);
 }
-
