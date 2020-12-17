@@ -59,14 +59,6 @@ require('tabs.php');
 $mygroupid = groups_get_activity_group($cm, true);
 groups_print_activity_menu($cm, $url);
 
-// Button "Export to excel".
-if (has_capability('mod/feedback:viewreports', $context) && $feedbackstructure->get_items()) {
-    echo $OUTPUT->container_start('form-buttons');
-    $aurl = new moodle_url('/mod/feedback/analysis_to_excel.php', ['sesskey' => sesskey(), 'id' => $id]);
-    echo $OUTPUT->single_button($aurl, get_string('export_to_excel', 'feedback'));
-    echo $OUTPUT->container_end();
-}
-
 // Show the summary.
 $summary = new mod_feedback\output\summary($feedbackstructure, $mygroupid);
 echo $OUTPUT->render_from_template('mod_feedback/summary', $summary->export_for_template($OUTPUT));
@@ -75,15 +67,28 @@ echo $OUTPUT->render_from_template('mod_feedback/summary', $summary->export_for_
 $items = $feedbackstructure->get_items(true);
 
 $check_anonymously = true;
-if ($mygroupid > 0 AND $feedback->anonymous != FEEDBACK_ANONYMOUS_NO) { //JPC
+// JPC: Next check were done only in group mode. Now it is checked in every analysis.
+if ($feedback->anonymous != FEEDBACK_ANONYMOUS_NO) { //JPC
     $completedcount = $feedbackstructure->count_completed_responses($mygroupid);
     if ($completedcount < FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
         $check_anonymously = false;
     }
 }
-
 echo '<div>';
+// JPC: Trully anonymous does not allow to check evolution of statistics while running the voting.
+if ($feedback->timeclose == 0 OR $feedback->timeclose > time()) {
+    echo $OUTPUT->heading_with_help(get_string('anonymous_voting_undergoing', 'feedback'),
+                                    'anonymous_voting_undergoing',
+                                    'feedback', '', '', 3);
+} else
 if ($check_anonymously) {
+    // Button "Export to excel". JPC: Only shown when anonymity is respected.
+    if (has_capability('mod/feedback:viewreports', $context) && $feedbackstructure->get_items()) {
+        echo $OUTPUT->container_start('form-buttons');
+        $aurl = new moodle_url('/mod/feedback/analysis_to_excel.php', ['sesskey' => sesskey(), 'id' => $id]);
+        echo $OUTPUT->single_button($aurl, get_string('export_to_excel', 'feedback'));
+        echo $OUTPUT->container_end();
+    }
     // Print the items in an analysed form.
     foreach ($items as $item) {
         $itemobj = feedback_get_item_class($item->typ);
