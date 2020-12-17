@@ -42,6 +42,12 @@ require_capability('mod/feedback:viewreports', $context);
 
 $feedback = $PAGE->activityrecord;
 
+// JPC: Trully anonymous does not allow to check evolution of statistics while running the voting.
+if ($feedback->timeclose == 0 || $feedback->timeclose > now()) {
+    $urlredirect = new moodle_url('/mod/feedback/analysis.php',['id'=>$id]);
+    redirect($urlredirect);
+}
+
 // Buffering any output. This prevents some output before the excel-header will be send.
 ob_start();
 ob_end_clean();
