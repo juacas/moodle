@@ -93,12 +93,18 @@ class mod_feedback_complete_form extends moodleform {
 
         if (isloggedin() && !isguestuser() && $this->mode != self::MODE_EDIT && $this->mode != self::MODE_VIEW_TEMPLATE &&
                     $this->mode != self::MODE_VIEW_RESPONSE) {
-            // Output information about the current mode (anonymous or not) in some modes.
-            if ($this->structure->is_anonymous()) {
-                $anonymousmodeinfo = get_string('anonymous', 'feedback');
-            } else {
-                $anonymousmodeinfo = get_string('non_anonymous', 'feedback');
+            // Output information about the current mode (anonymous, trully anonymous or not) in some modes.
+            switch ($this->structure->get_feedback()->anonymous) {
+                case FEEDBACK_ANONYMOUS_TRULLY:
+                    $anonymousmodeinfo = get_string('trully_anonymous', 'feedback');
+                    break;
+                case FEEDBACK_ANONYMOUS_YES:
+                    $anonymousmodeinfo = get_string('anonymous', 'feedback');
+                    break;
+                case FEEDBACK_ANONYMOUS_NO:
+                    $anonymousmodeinfo = get_string('non_anonymous', 'feedback');
             }
+
             $element = $mform->addElement('static', 'anonymousmode', '',
                     get_string('mode', 'feedback') . ': ' . $anonymousmodeinfo);
             $element->setAttributes($element->getAttributes() + ['class' => 'feedback_mode']);

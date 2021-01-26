@@ -84,9 +84,9 @@ class mod_feedback_mod_form extends moodleform_mod {
             $mform->setType('anonymous', PARAM_INT);
         } else {
             $options=array();
-            $options[1]  = get_string('anonymous', 'feedback');
-            $options[2]  = get_string('non_anonymous', 'feedback');
-            $options[3]  = get_string('trully_anonymous', 'feedback');
+            $options[FEEDBACK_ANONYMOUS_YES]  = get_string('anonymous', 'feedback');
+            $options[FEEDBACK_ANONYMOUS_NO]  = get_string('non_anonymous', 'feedback');
+            $options[FEEDBACK_ANONYMOUS_TRULLY]  = get_string('trully_anonymous', 'feedback');
             $mform->addElement('select',
                                'anonymous',
                                get_string('anonymous_edit', 'feedback'),
