@@ -76,12 +76,11 @@ if ($feedback->anonymous != FEEDBACK_ANONYMOUS_NO) { //JPC
 }
 echo '<div>';
 // JPC: Trully anonymous does not allow to check evolution of statistics while running the voting.
-if ($feedback->timeclose == 0 OR $feedback->timeclose > time()) {
+if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY && $feedback->timeclose == 0 OR $feedback->timeclose > time()) {
     echo $OUTPUT->heading_with_help(get_string('anonymous_voting_undergoing', 'feedback'),
                                     'anonymous_voting_undergoing',
                                     'feedback', '', '', 3);
-} else
-if ($check_anonymously) {
+} else if ($check_anonymously) {
     // Button "Export to excel". JPC: Only shown when anonymity is respected.
     if (has_capability('mod/feedback:viewreports', $context) && $feedbackstructure->get_items()) {
         echo $OUTPUT->container_start('form-buttons');
