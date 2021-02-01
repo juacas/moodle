@@ -44,12 +44,20 @@ require_login($course, true, $cm);
 $feedback = $PAGE->activityrecord;
 $feedbackstructure = new mod_feedback_structure($feedback, $cm, 0, $templateid);
 
+// If mode is ANONYMOUS_TRULLY and there is any response the feedback is locked.
+$feedbacklocked = false;
+$mygroupid = groups_get_activity_group($cm, true);
+$responses = $feedbackstructure->count_completed_responses($mygroupid);
+if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY && $responses >0) {
+    $feedbacklocked = true;
+}
 require_capability('mod/feedback:edititems', $context);
 
 $mform = new mod_feedback_use_templ_form();
 $mform->set_data(array('id' => $id, 'templateid' => $templateid));
 
-if ($mform->is_cancelled()) {
+// If Feedback id locked the template can't be applied.
+if ($feedbacklocked === true || $mform->is_cancelled()) {
     redirect('edit.php?id='.$id.'&do_show=templates');
 } else if ($formdata = $mform->get_data()) {
     feedback_items_from_template($feedback, $templateid, $formdata->deleteolditems);
@@ -81,4 +89,3 @@ $form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_VIEW_TEM
 $form->display();
 
 echo $OUTPUT->footer();
-
