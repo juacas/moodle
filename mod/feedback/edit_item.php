@@ -50,6 +50,15 @@ $context = context_module::instance($cm->id);
 require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 
+$feedbackstructure = new mod_feedback_structure($feedback, $cm);
+// If mode is ANONYMOUS_TRULLY and there is any response the feedback is locked.
+$feedbacklocked = false;
+$mygroupid = groups_get_activity_group($cm, true);
+$responses = $feedbackstructure->count_completed_responses($mygroupid);
+if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY && $responses >0) {
+    $feedbacklocked = true;
+}
+
 $editurl = new moodle_url('/mod/feedback/edit.php', array('id' => $cm->id));
 
 $PAGE->set_url($url);
@@ -113,7 +122,11 @@ require('tabs.php');
 if (isset($error)) {
     echo $error;
 }
-$itemobj->show_editform();
+if ($feedbacklocked == false) {
+    $itemobj->show_editform();
+} else {
+    echo $OUTPUT->heading("Poll is locked");
+}
 
 /// Finish the page
 ///////////////////////////////////////////////////////////////////////////
