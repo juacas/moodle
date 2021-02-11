@@ -57,6 +57,9 @@ $context = context_module::instance($cm->id);
 require_login($course, true, $cm);
 
 require_capability('mod/feedback:edititems', $context);
+// Check if feedback is locked.
+$feedbackstructure = new mod_feedback_structure($feedback, $cm);
+$feedbacklocked = $feedbackstructure->is_locked($feedbackstructure);
 
 $mform = new feedback_import_form();
 $newformdata = array('id'=>$id,
@@ -70,7 +73,10 @@ $formdata = $mform->get_data();
 if ($mform->is_cancelled()) {
     redirect('edit.php?id='.$id.'&do_show=templates');
 }
-
+if ($feedbacklocked == true) {
+     $url = 'edit.php?id='.$id.'&do_show=templates';
+        redirect($url, get_string('feedbacklocked', 'feedback'), 3);
+}
 // process if we are happy file is ok
 if ($choosefile) {
     $xmlcontent = $mform->get_file_content('choosefile');

@@ -183,7 +183,26 @@ class mod_feedback_structure {
     public function is_anonymous() {
         return $this->feedback->anonymous != FEEDBACK_ANONYMOUS_NO; // JPC
     }
-
+    /**
+     * Determines if the feedback structure should be read-only
+     * If mode is ANONYMOUS_TRULLY and there is any response the feedback is locked.
+     * @return boolean
+     */
+    function is_locked() {
+        $feedbacklocked = false;
+        $cm = $this->get_cm();
+        $feedback = $this->get_feedback();
+        if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY ) {
+            $mygroupid = 0; // Don't separate by groups.
+        } else {
+            $mygroupid = groups_get_activity_group($cm, true);
+        }
+        $responses = $this->count_completed_responses($mygroupid);
+        if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY && $responses >0) {
+            $feedbacklocked = true;
+        }
+        return $feedbacklocked;
+    }
     /**
      * Returns the formatted text of the page after submit or null if it is not set
      *
