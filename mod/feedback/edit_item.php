@@ -51,7 +51,7 @@ require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 
 $feedbackstructure = new mod_feedback_structure($feedback, $cm);
-$feedbacklocked = $feedbackstructure->is_locked($feedbackstructure);
+$feedbacklocked = $feedbackstructure->is_locked();
 
 $editurl = new moodle_url('/mod/feedback/edit.php', array('id' => $cm->id));
 

@@ -49,7 +49,7 @@ require_login($course, false, $cm);
 require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 $feedbackstructure = new mod_feedback_structure($feedback, $cm);
-$feedbacklocked = $feedbackstructure->is_locked($feedbackstructure);
+$feedbacklocked = $feedbackstructure->is_locked();
 
 if ($switchitemrequired) {
     require_sesskey();
