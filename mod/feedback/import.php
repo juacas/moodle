@@ -59,7 +59,7 @@ require_login($course, true, $cm);
 require_capability('mod/feedback:edititems', $context);
 // Check if feedback is locked.
 $feedbackstructure = new mod_feedback_structure($feedback, $cm);
-$feedbacklocked = $feedbackstructure->is_locked($feedbackstructure);
+$feedbacklocked = $feedbackstructure->is_locked();
 
 $mform = new feedback_import_form();
 $newformdata = array('id'=>$id,
