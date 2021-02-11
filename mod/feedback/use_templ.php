@@ -43,14 +43,8 @@ require_login($course, true, $cm);
 
 $feedback = $PAGE->activityrecord;
 $feedbackstructure = new mod_feedback_structure($feedback, $cm, 0, $templateid);
+$feedbacklocked = feedback_is_locked($feedbackstructure);
 
-// If mode is ANONYMOUS_TRULLY and there is any response the feedback is locked.
-$feedbacklocked = false;
-$mygroupid = groups_get_activity_group($cm, true);
-$responses = $feedbackstructure->count_completed_responses($mygroupid);
-if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY && $responses >0) {
-    $feedbacklocked = true;
-}
 require_capability('mod/feedback:edititems', $context);
 
 $mform = new mod_feedback_use_templ_form();

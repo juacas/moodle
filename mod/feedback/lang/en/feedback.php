@@ -114,6 +114,7 @@ $string['eventresponsesubmitted'] = 'Response submitted';
 $string['feedbackcompleted'] = '{$a->username} completed {$a->feedbackname}';
 $string['feedback:addinstance'] = 'Add a new feedback';
 $string['feedbackclose'] = 'Allow answers to';
+$string['feedbacklocked'] = 'Feedback structure is locked. Can\'t be modified after it has responses.';
 $string['feedback:complete'] = 'Complete a feedback';
 $string['feedback:createprivatetemplate'] = 'Create private template';
 $string['feedback:createpublictemplate'] = 'Create public template';

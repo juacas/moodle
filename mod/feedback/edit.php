@@ -49,14 +49,7 @@ require_login($course, false, $cm);
 require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 $feedbackstructure = new mod_feedback_structure($feedback, $cm);
-
-// If mode is ANONYMOUS_TRULLY and there is any response the feedback is locked.
-$feedbacklocked = false;
-$mygroupid = groups_get_activity_group($cm, true);
-$responses = $feedbackstructure->count_completed_responses($mygroupid);
-if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULLY && $responses >0) {
-    $feedbacklocked = true;
-}
+$feedbacklocked = $feedbackstructure->is_locked($feedbackstructure);
 
 if ($switchitemrequired) {
     require_sesskey();
@@ -161,9 +154,11 @@ if ($do_show == 'templates') {
         $exporturl = new moodle_url('/mod/feedback/export.php', $urlparams);
         $importurl = new moodle_url('/mod/feedback/import.php', array('id'=>$id));
         echo '<p>
-            <a href="'.$exporturl->out().'">'.get_string('export_questions', 'feedback').'</a>/
-            <a href="'.$importurl->out().'">'.get_string('import_questions', 'feedback').'</a>
-        </p>';
+            <a href="'.$exporturl->out().'">'.get_string('export_questions', 'feedback').'</a>';
+        if ($feedbacklocked == false) {
+            echo '<a href="'.$importurl->out().'">'.get_string('import_questions', 'feedback').'</a>';
+        }
+        echo '</p>';
     }
 }
 
@@ -182,7 +177,7 @@ if ($do_show == 'edit') {
         echo $OUTPUT->render($select);
         $formmode = mod_feedback_complete_form::MODE_EDIT;
     } else {
-        echo $OUTPUT->heading("Feedback Locked");
+        echo $OUTPUT->heading(get_string('feedbacklocked', 'feedback'));
         $formmode = mod_feedback_complete_form::MODE_PRINT;
     }
 
