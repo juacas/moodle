@@ -44,6 +44,7 @@ require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 $feedbackstructure = new mod_feedback_structure($feedback, $cm);
 $url = new moodle_url('/mod/feedback/edit.php', ['id' => $cm->id]);
+$feedbacklocked = $feedbackstructure->is_locked($feedbackstructure);
 
 if ($switchitemrequired) {
     require_sesskey();

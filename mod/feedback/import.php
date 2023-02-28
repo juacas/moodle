@@ -58,6 +58,9 @@ require_login($course, true, $cm);
 
 require_capability('mod/feedback:edititems', $context);
 $actionbar = new \mod_feedback\output\edit_action_bar($cm->id, $url);
+// Check if feedback is locked.
+$feedbackstructure = new mod_feedback_structure($feedback, $cm);
+$feedbacklocked = $feedbackstructure->is_locked($feedbackstructure);
 
 $mform = new feedback_import_form();
 $newformdata = array('id'=>$id,
