@@ -50,6 +50,9 @@ $context = context_module::instance($cm->id);
 require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 
+$feedbackstructure = new mod_feedback_structure($feedback, $cm);
+$feedbacklocked = $feedbackstructure->is_locked();
+
 $editurl = new moodle_url('/mod/feedback/edit.php', array('id' => $cm->id));
 
 $PAGE->set_url($url);
@@ -57,7 +60,11 @@ $PAGE->set_url($url);
 // If the typ is pagebreak so the item will be saved directly.
 if (!$item->id && $typ === 'pagebreak') {
     require_sesskey();
-    feedback_create_pagebreak($feedback->id);
+    // JPC: Avoid pagebreaks if feedback is ANONYMOUS_TRULY.
+    // PageBreak forces temporal storage of responses which breaks anonymity for a while.
+    if ($feedback->anonymous !== FEEDBACK_ANONYMOUS_TRULY ) {   
+        feedback_create_pagebreak($feedback->id);
+        }
     redirect($editurl->out(false));
     exit;
 }
@@ -113,7 +120,12 @@ $id = $cm->id;
 if (isset($error)) {
     echo $error;
 }
-$itemobj->show_editform();
+if ($feedbacklocked == false) {
+    $itemobj->show_editform();
+} else {
+    // JPC: Notify the user that the feedback is locked.
+    echo $OUTPUT->notification(get_string('feedbacklocked', 'feedback'), \core\output\notification::NOTIFY_INFO);
+}
 
 /// Finish the page
 ///////////////////////////////////////////////////////////////////////////

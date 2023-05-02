@@ -52,6 +52,23 @@ require_capability('mod/feedback:viewreports', $context);
 
 $actionbar = new \mod_feedback\output\responses_action_bar($cm->id, $baseurl);
 
+// JPC: Should not be here!
+if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULY) {
+    // Print the page header.
+    navigation_node::override_active_url($baseurl);
+    $PAGE->set_heading($course->fullname);
+    $PAGE->set_title($feedback->name);
+    $PAGE->activityheader->set_attrs([
+        'hidecompletion' => true,
+        'description' => ''
+    ]);
+    $PAGE->add_body_class('limitedwidth');
+    echo $OUTPUT->header();
+    echo $OUTPUT->heading(get_string('truly_anonymous', 'feedback'));
+    echo $OUTPUT->footer();
+    die;
+}
+// JPC: end
 if ($deleteid) {
     // This is a request to delete a reponse.
     require_capability('mod/feedback:deletesubmissions', $context);

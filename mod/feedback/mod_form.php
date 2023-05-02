@@ -60,14 +60,6 @@ class mod_feedback_mod_form extends moodleform_mod {
         //-------------------------------------------------------------------------------
         $mform->addElement('header', 'feedbackhdr', get_string('questionandsubmission', 'feedback'));
 
-        $options=array();
-        $options[1]  = get_string('anonymous', 'feedback');
-        $options[2]  = get_string('non_anonymous', 'feedback');
-        $mform->addElement('select',
-                           'anonymous',
-                           get_string('anonymous_edit', 'feedback'),
-                           $options);
-
         // check if there is existing responses to this feedback
         if (is_numeric($this->_instance) AND
                     $this->_instance AND
@@ -77,7 +69,30 @@ class mod_feedback_mod_form extends moodleform_mod {
         } else {
             $completed_feedback_count = false;
         }
+    	// JPC: Don't change type if TRULY ANONYMOUS and feedback has responses.
+        if ($completed_feedback_count && $feedback->anonymous == FEEDBACK_ANONYMOUS_TRULY) {
+            $anonymoustruly = get_string('truly_anonymous', 'feedback');
+            $mform->addElement('text',
+                               'anonymous_static',
+                               get_string('anonymous_edit', 'feedback'),
+                               array('size'=> strlen($anonymoustruly),
+                                    'disabled'=>'disabled',
+                                    'value'=> $anonymoustruly));
+            $mform->setType('anonymous_static', PARAM_RAW);
 
+            $mform->addElement('hidden', 'anonymous', '');
+            $mform->setType('anonymous', PARAM_INT);
+        } else {
+            $options=array();
+            $options[FEEDBACK_ANONYMOUS_YES]  = get_string('anonymous', 'feedback');
+            $options[FEEDBACK_ANONYMOUS_NO]  = get_string('non_anonymous', 'feedback');
+            $options[FEEDBACK_ANONYMOUS_TRULY]  = get_string('truly_anonymous', 'feedback');
+            $mform->addElement('select',
+                               'anonymous',
+                               get_string('anonymous_edit', 'feedback'),
+                               $options);
+        }
+    	// JPC: End
         if ($completed_feedback_count) {
             $multiple_submit_value = $feedback->multiple_submit ? get_string('yes') : get_string('no');
             $mform->addElement('text',

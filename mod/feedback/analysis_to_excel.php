@@ -42,15 +42,26 @@ require_capability('mod/feedback:viewreports', $context);
 
 $feedback = $PAGE->activityrecord;
 
-// Buffering any output. This prevents some output before the excel-header will be send.
-ob_start();
-ob_end_clean();
-
 // Get the questions (item-names).
 $feedbackstructure = new mod_feedback_structure($feedback, $cm, $course->id);
 if (!$items = $feedbackstructure->get_items(true)) {
     throw new \moodle_exception('no_items_available_yet', 'feedback', $cm->url);
 }
+$completedcount = $feedbackstructure->count_completed_responses();
+if ($completedcount < FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
+    $urlredirect = new moodle_url('/mod/feedback/analysis.php',['id'=>$id]);
+    redirect($urlredirect,  get_string('insufficient_responses_for_this_group', 'feedback'));
+}
+// JPC: Truly anonymous does not allow to check evolution of statistics while running the voting.
+if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULY && ($feedback->timeclose == 0 || $feedback->timeclose > time())) {
+    $urlredirect = new moodle_url('/mod/feedback/analysis.php',['id'=>$id]);
+    redirect($urlredirect);
+}
+
+// Buffering any output. This prevents some output before the excel-header will be send.
+ob_start();
+ob_end_clean();
+
 
 $mygroupid = groups_get_activity_group($cm);
 

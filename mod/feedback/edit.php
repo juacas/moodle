@@ -43,6 +43,7 @@ require_login($course, false, $cm);
 require_capability('mod/feedback:edititems', $context);
 $feedback = $PAGE->activityrecord;
 $feedbackstructure = new mod_feedback_structure($feedback, $cm);
+$feedbacklocked = $feedbackstructure->is_locked();
 $url = new moodle_url('/mod/feedback/edit.php', ['id' => $cm->id]);
 
 if ($switchitemrequired) {
@@ -57,7 +58,7 @@ if ($switchitemrequired) {
 if ($deleteitem) {
     require_sesskey();
     $items = $feedbackstructure->get_items();
-    if (isset($items[$deleteitem])) {
+    if ($feedbacklocked === false && isset($items[$deleteitem])) {
         feedback_delete_item($deleteitem);
     }
     redirect($url);
@@ -103,14 +104,22 @@ if (count($feedbackitems) > 1) {
 }
 
 echo $OUTPUT->header();
+// JPC: Notify the user that the feedback is locked.
+if ($feedbackstructure->is_locked()) {
+    echo $OUTPUT->notification(get_string('feedbacklocked', 'feedback'), \core\output\notification::NOTIFY_INFO);
+}
 /** @var \mod_feedback\output\renderer $renderer */
 $renderer = $PAGE->get_renderer('mod_feedback');
 echo $renderer->main_action_bar($actionbar);
-$form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_EDIT,
-        $feedbackstructure, 'feedback_edit_form');
-echo '<div id="feedback_dragarea">'; // The container for the dragging area.
-$form->display();
-echo '</div>';
+
+ // JPC: Omit edit items if feedback is locked.
+if ($feedbacklocked === false) {
+    $form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_EDIT,
+            $feedbackstructure, 'feedback_edit_form');
+    echo '<div id="feedback_dragarea">'; // The container for the dragging area.
+    $form->display();
+    echo '</div>';
+}
 
 if ($cancreatetemplates) {
     echo $renderer->create_template_form($id);
