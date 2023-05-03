@@ -1,0 +1,112 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template tool_gdpr_plus/policy_consent
+
+    Template for the policy consent message (see tool policy)
+
+    Context variables required for this template:
+    * pluginbaseurl
+    * returnurl - urlencoded URL to return to
+    * haspolicies - true if there are guest policies; false otherwise
+    * mandatorypolicies - array of policy documents
+    * optionalpolicies - array of policy documents
+
+
+    Example context (json):
+    {
+        "pluginbaseurl": "https://example.com",
+        "returnurl": "/",
+        "haspolicies": true,
+        "mandatorypolicies": [
+            {
+                "id": 1,
+                "name": "Terms &amp; conditions"
+            }
+        ],
+        "optionalpolicies": [
+            {
+                "id": 1,
+                "name": "Terms &amp; conditions"
+            }
+        ]
+    }
+
+}}
+
+<div class="policies-consent tool_gdpr_plus" id="gdpr-plus-{{uniqid}}">
+    <div class="policy-container bg-dark text-light">
+        <div class="banner p-2 d-flex flex-column text-center">
+            <div class="description p-1">
+                {{# str }} policiesconsent:label, tool_gdpr_plus {{/ str }}
+            </div>
+            <div class="policy_buttons tool_gdpr_plus buttons">
+                <button class="btn-secondary tool_gdpr_plus_action" data-action="reject-nonessential">
+                    {{# str }} policiesconsent:button:rejectnonessential, tool_gdpr_plus {{/ str }}
+                </button>
+                <button class="btn-secondary tool_gdpr_plus_action" data-action="accept-all">
+                    {{# str }} policiesconsent:button:acceptall, tool_gdpr_plus {{/ str }}
+                </button>
+                <button class="btn-primary" type="button" data-toggle="collapse" data-target="#gdpr-plus-settings-{{uniqid}}" aria-expanded="false" aria-controls="gdpr-plus-settings-{{uniqid}}">
+                    <i class="fa fa-angle-down" aria-hidden="true"></i>
+                    {{# str }} policiesconsent:button:showsettings, tool_gdpr_plus {{/ str }}
+                </button>
+            </div>
+            <div class="policies-settings-container collapse text-dark pt-3" id="gdpr-plus-settings-{{uniqid}}">
+                <div class="card card-body policies-categories d-flex">
+                    {{#hasmandatorypolicies}}
+                        <h5 class="text-left">{{# str }} policiesconsent:mandatoryagreement, tool_gdpr_plus {{/ str }}</h5>
+                        <ul class="list-unstyled text-left m-3">
+                            {{#mandatorypolicies}}
+                               {{>tool_gdpr_plus/policy_switch}}
+                            {{/mandatorypolicies}}
+                        </ul>
+                    {{/hasmandatorypolicies}}
+                    {{#hasoptionalpolicies}}
+                        <h5 class="text-left">{{# str }} policiesconsent:optionalagreement, tool_gdpr_plus {{/ str }}</h5>
+                        <ul class="list-unstyled text-left m-3">
+                            {{#optionalpolicies}}
+                                {{>tool_gdpr_plus/policy_switch}}
+                            {{/optionalpolicies}}
+                        </ul>
+                    {{/hasoptionalpolicies}}
+                    <button class="btn-secondary align-self-end tool_gdpr_plus_action" data-action="accept-selected">
+                        {{# str }} policiesconsent:button:acceptselected, tool_gdpr_plus {{/ str }}
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <a class="show-popup" role="button" >
+        {{# str }} policiesconsent:button:showbanner, tool_gdpr_plus {{/ str }}
+    </a>
+</div>
+{{#haspolicies}}
+    {{#js}}
+        require(['tool_gdpr_plus/policies-consent-manager', 'tool_policy/policyactions'], function(PoliciesConsentManager, Actions) {
+            // Get localised messages.
+            var continuemessage = "{{# str }} policiesconsent:button:continue, tool_gdpr_plus {{/ str }}";
+            // Do not display within in all H5P or other embedded iframes.
+            if (window.location === window.parent.location) {
+                var cc = new PoliciesConsentManager({
+                        containerId: "gdpr-plus-{{uniqid}}",
+                        policyAgreed: {{policyagreed}}
+                    });
+            }
+        });
+    {{/js}}
+{{/haspolicies}}
