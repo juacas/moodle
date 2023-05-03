@@ -135,7 +135,6 @@ if (!empty($jsfiles)) {
     $jsfile = $jsfiles[$modulename];
     $shortfilename = str_replace($CFG->dirroot, '', $jsfile);
     $mapfile = $jsfile . '.map';
-
     if (file_exists($mapfile)) {
         // We've got a a source map file so we can return the minified file here and
         // the source map will be used by the browser to debug.
@@ -156,17 +155,17 @@ if (!empty($jsfiles)) {
         $js = file_get_contents($originalsource);
         $js = rtrim($js);
     }
-
+    
     if (preg_match('/define\(\s*(\[|function)/', $js)) {
         // If the JavaScript module has been defined without specifying a name then we'll
         // add the Moodle module name now.
         $replace = 'define(\'' . $modulename . '\', ';
-
+        
         // Replace only the first occurrence.
         $js = implode($replace, explode('define(', $js, 2));
     } else if (!preg_match('/define\s*\(/', $js)) {
         debugging('JS file: ' . $shortfilename . ' cannot be loaded, or does not contain a javascript' .
-                  ' module in AMD format. "define()" not found.', DEBUG_DEVELOPER);
+        ' module in AMD format. "define()" not found.', DEBUG_DEVELOPER);
     }
 
     js_send_uncached($js, 'requirejs.php');
