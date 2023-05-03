@@ -459,7 +459,7 @@ class backup_course_structure_step extends backup_structure_step {
             'timecreated', 'timemodified',
             'requested',
             'showactivitydates',
-            'showcompletionconditions',
+            'showcompletionconditions', 'pdfexportfont',
             'enablecompletion', 'completionstartonenrol', 'completionnotify'));
 
         $category = new backup_nested_element('category', array('id'), array(
@@ -546,9 +546,11 @@ class backup_course_structure_step extends backup_structure_step {
                                      backup_helper::is_sqlparam('course'),
                                      backup::VAR_PARENTID));
 
+        // Section level settings are dealt with in backup_section_structure_step.
+        // We only need to deal with course level (sectionid = 0) here.
         $courseformatoption->set_source_sql('SELECT id, format, sectionid, name, value
                                  FROM {course_format_options}
-                                 WHERE courseid = ?', [ backup::VAR_PARENTID ]);
+                                 WHERE courseid = ? AND sectionid = 0', [ backup::VAR_PARENTID ]);
 
         $handler = core_course\customfield\course_handler::create();
         $fieldsforbackup = $handler->get_instance_data_for_backup($this->task->get_courseid());
@@ -1339,7 +1341,7 @@ class backup_groups_structure_step extends backup_structure_step {
 
         $group = new backup_nested_element('group', array('id'), array(
             'name', 'idnumber', 'description', 'descriptionformat', 'enrolmentkey',
-            'picture', 'timecreated', 'timemodified'));
+            'picture', 'visibility', 'participation', 'timecreated', 'timemodified'));
 
         $members = new backup_nested_element('group_members');
 
@@ -2983,5 +2985,37 @@ class backup_contentbankcontent_structure_step extends backup_structure_step {
 
         // Return the root element (contents).
         return $contents;
+    }
+}
+
+/**
+ * Structure step in charge of constructing the xapistate.xml file for all the xAPI states found in a given context.
+ */
+class backup_xapistate_structure_step extends backup_structure_step {
+
+    /**
+     * Define structure for content bank step
+     */
+    protected function define_structure() {
+
+        // Define each element separated.
+        $states = new backup_nested_element('states');
+        $state = new backup_nested_element(
+            'state',
+            ['id'],
+            ['component', 'userid', 'itemid', 'stateid', 'statedata', 'registration', 'timecreated', 'timemodified']
+        );
+
+        // Build the tree.
+        $states->add_child($state);
+
+        // Define sources.
+        $state->set_source_table('xapi_states', ['itemid' => backup::VAR_CONTEXTID]);
+
+        // Define annotations.
+        $state->annotate_ids('user', 'userid');
+
+        // Return the root element (contents).
+        return $states;
     }
 }

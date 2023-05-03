@@ -194,6 +194,9 @@ class editor extends \texteditor {
 
             // Plugin configuration.
             'plugins' => $this->manager->get_plugin_configuration($context, $options, $fpoptions, $this),
+
+            // Nest menu inside parent DOM.
+            'nestedmenu' => true,
         ];
 
         if (defined('BEHAT_SITE_RUNNING') && BEHAT_SITE_RUNNING) {
@@ -223,8 +226,8 @@ class editor extends \texteditor {
             M.util.js_pending('editor_tiny/editor');
             require(['editor_tiny/editor'], (Tiny) => {
                 Tiny.setupForElementId({
-                    elementId: "${elementid}",
-                    options: ${configoptions},
+                    elementId: "{$elementid}",
+                    options: {$configoptions},
                 });
                 M.util.js_complete('editor_tiny/editor');
             });

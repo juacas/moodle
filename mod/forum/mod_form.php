@@ -205,10 +205,6 @@ class mod_forum_mod_form extends moodleform_mod {
         $mform->addHelpButton('warnafter', 'warnafter', 'forum');
         $mform->hideIf('warnafter', 'blockperiod', 'eq', 0);
 
-        $coursecontext = context_course::instance($COURSE->id);
-        // To be removed (deprecated) with MDL-67526.
-        plagiarism_get_form_elements_module($mform, $coursecontext, 'mod_forum');
-
 //-------------------------------------------------------------------------------
 
         // Add the whole forum grading options.
@@ -340,6 +336,11 @@ class mod_forum_mod_form extends moodleform_mod {
 
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
+
+        if ($data['type'] === 'single' && $data['groupmode'] == SEPARATEGROUPS) {
+            $errors['type'] = get_string('cannotusesingletopicandseperategroups', 'forum');
+            $errors['groupmode'] = get_string('cannotuseseperategroupsandsingletopic', 'forum');
+        }
 
         if ($data['duedate'] && $data['cutoffdate']) {
             if ($data['duedate'] > $data['cutoffdate']) {

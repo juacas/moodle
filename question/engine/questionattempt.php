@@ -622,7 +622,8 @@ class question_attempt {
 
         // No files yet.
         $draftid = 0; // Will be filled in by file_prepare_draft_area.
-        file_prepare_draft_area($draftid, $contextid, 'question', 'response_' . $name, null);
+        $filearea = question_file_saver::clean_file_area_name('response_' . $name);
+        file_prepare_draft_area($draftid, $contextid, 'question', $filearea, null);
         return $draftid;
     }
 
@@ -1472,9 +1473,18 @@ class question_attempt {
         if ($this->get_question(false) === $otherversion) {
             return $oldstep->get_all_data();
         } else {
+            // Update the data belonging to the question type by asking the question to do it.
             $attemptstatedata = $this->get_question(false)->update_attempt_state_data_for_new_version(
                     $oldstep, $otherversion);
-            return array_merge($attemptstatedata, $oldstep->get_behaviour_data());
+
+            // Then copy over all the behaviour and metadata variables.
+            // This terminology is explained in the class comment on {@see question_attempt_step}.
+            foreach ($oldstep->get_all_data() as $name => $value) {
+                if (substr($name, 0, 1) === '-' || substr($name, 0, 2) === ':_') {
+                    $attemptstatedata[$name] = $value;
+                }
+            }
+            return $attemptstatedata;
         }
     }
 

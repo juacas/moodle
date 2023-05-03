@@ -892,6 +892,9 @@ class component_test extends advanced_testcase {
         $apis = $sortedapis = core_component::get_core_apis();
         ksort($sortedapis); // We'll need this later.
 
+        $subsystems = core_component::get_core_subsystems(); // To verify all apis are pointing to valid subsystems.
+        $subsystems['core'] = 'anything'; // Let's add 'core' because it's a valid component for apis.
+
         // General structure validations.
         $this->assertIsArray($apis);
         $this->assertGreaterThan(25, count($apis));
@@ -903,7 +906,7 @@ class component_test extends advanced_testcase {
         // Iterate over all apis and perform more validations.
         foreach ($apis as $apiname => $attributes) {
             // Message, to be used later and easier finding the problem.
-            $message = "Validation problem found with API: ${apiname}";
+            $message = "Validation problem found with API: {$apiname}";
 
             $this->assertIsObject($attributes, $message);
             $this->assertMatchesRegularExpression('/^[a-z][a-z0-9]+$/', $apiname, $message);
@@ -911,16 +914,67 @@ class component_test extends advanced_testcase {
 
             // Verify attributes.
             if ($apiname !== 'core') { // Exception for core api, it doesn't have component.
+                // Check that component attribute looks correct.
                 $this->assertMatchesRegularExpression('/^(core|[a-z][a-z0-9_]+)$/', $attributes->component, $message);
+                // Ensure that the api component (without the core_ prefix) is a correct subsystem.
+                $this->assertArrayHasKey(str_replace('core_', '', $attributes->component), $subsystems, $message);
             } else {
                 $this->assertNull($attributes->component, $message);
             }
 
+
+            // Now check for the rest of attributes.
             $this->assertIsBool($attributes->allowedlevel2, $message);
             $this->assertIsBool($attributes->allowedspread, $message);
 
             // Cannot spread if level2 is not allowed.
             $this->assertLessThanOrEqual($attributes->allowedlevel2, $attributes->allowedspread, $message);
         }
+    }
+
+    /**
+     * Test for monologo icons check in plugins.
+     *
+     * @covers core_component::has_monologo_icon
+     * @return void
+     */
+    public function test_has_monologo_icon(): void {
+        // The Forum activity plugin has monologo icons.
+        $this->assertTrue(core_component::has_monologo_icon('mod', 'forum'));
+        // The core H5P subsystem doesn't have monologo icons.
+        $this->assertFalse(core_component::has_monologo_icon('core', 'h5p'));
+        // The function will return false for a non-existent component.
+        $this->assertFalse(core_component::has_monologo_icon('randomcomponent', 'h5p'));
+    }
+
+    /*
+     * Tests the getter for the db directory summary hash.
+     *
+     * @covers \core_component::get_all_directory_hashes
+     */
+    public function test_get_db_directories_hash() {
+        $initial = \core_component::get_all_component_hash();
+
+        $dir = make_request_directory();
+        $hashes = \core_component::get_all_directory_hashes([$dir]);
+        $emptydirhash = \core_component::get_all_component_hash([$hashes]);
+
+        // Confirm that a single empty directory is a different hash to the core hash.
+        $this->assertNotEquals($initial, $emptydirhash);
+
+        // Now lets add something to the dir, and check the hash is different.
+        $file = fopen($dir . '/test.php', 'w');
+        fwrite($file, 'sometestdata');
+        fclose($file);
+
+        $hashes = \core_component::get_all_directory_hashes([$dir]);
+        $onefiledirhash = \core_component::get_all_component_hash([$hashes]);
+        $this->assertNotEquals($emptydirhash, $onefiledirhash);
+
+        // Now add a subdirectory inside the request dir. This should not affect the hash.
+        mkdir($dir . '/subdir');
+        $hashes = \core_component::get_all_directory_hashes([$dir]);
+        $finalhash = \core_component::get_all_component_hash([$hashes]);
+        $this->assertEquals($onefiledirhash, $finalhash);
     }
 }

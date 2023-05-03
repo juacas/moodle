@@ -199,7 +199,7 @@ class cache implements cache_loader {
      *   - simpledata : Set to true if the type of the data you are going to store is scalar, or an array of scalar vars
      *   - staticacceleration : If set to true the cache will hold onto data passing through it.
      *   - staticaccelerationsize : The max size for the static acceleration array.
-     * @return cache_application|cache_session|cache_store
+     * @return cache_application|cache_session|cache_request
      */
     public static function make_from_params($mode, $component, $area, array $identifiers = array(), array $options = array()) {
         $factory = cache_factory::instance();
@@ -1679,7 +1679,7 @@ class cache_application extends cache implements cache_loader_with_locking {
         if ($this->get_loader() !== false) {
             $this->get_loader()->acquire_lock($key);
         }
-        $key = $this->parse_key($key);
+        $key = cache_helper::hash_key($key, $this->get_definition());
         $before = microtime(true);
         if ($this->nativelocking) {
             $lock = $this->get_store()->acquire_lock($key, $this->get_identifier());
@@ -1706,7 +1706,7 @@ class cache_application extends cache implements cache_loader_with_locking {
      *      someone else has the lock.
      */
     public function check_lock_state($key) {
-        $key = $this->parse_key($key);
+        $key = cache_helper::hash_key($key, $this->get_definition());
         if (!empty($this->locks[$key])) {
             return true; // Shortcut to save having to make a call to the cache store if the lock is held by this process.
         }
@@ -1726,7 +1726,7 @@ class cache_application extends cache implements cache_loader_with_locking {
      */
     public function release_lock($key) {
         $loaderkey = $key;
-        $key = $this->parse_key($key);
+        $key = cache_helper::hash_key($key, $this->get_definition());
         if ($this->nativelocking) {
             $released = $this->get_store()->release_lock($key, $this->get_identifier());
         } else {

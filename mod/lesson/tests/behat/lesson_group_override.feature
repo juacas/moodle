@@ -30,8 +30,8 @@ Feature: Lesson group override
       | student2 | G2 |
       | student3 | G1 |
     And the following "activities" exist:
-      | activity | name             | intro                   | groupmode  | course | idnumber |
-      | lesson   | Test lesson name | Test lesson description | 1          | C1     | lesson1  |
+      | activity | name             | groupmode  | course | idnumber |
+      | lesson   | Test lesson name | 1          | C1     | lesson1  |
     And I am on the "Test lesson name" "lesson activity" page logged in as teacher1
     And I follow "Add a question page"
     And I set the field "Select a question type" to "True/false"
@@ -46,7 +46,6 @@ Feature: Lesson group override
       | id_response_editor_1 | Wrong |
       | id_jumpto_1          | This page |
     And I press "Save page"
-    And I log out
 
   Scenario: Add, modify then delete a group override
     Given I am on the "Test lesson name" "lesson activity" page logged in as teacher1
@@ -108,7 +107,6 @@ Feature: Lesson group override
       | Re-takes allowed | 1 |
     And I press "Save"
     And I should see "Re-takes allowed"
-    And I log out
     Given I am on the "Test lesson name" "lesson activity" page logged in as student1
     And I should see "Cat is an amphibian"
     And I set the following fields to these values:
@@ -119,7 +117,6 @@ Feature: Lesson group override
     And I am on the "Test lesson name" "lesson activity" page
     Then I should not see "You are not allowed to retake this lesson."
     And I should see "Cat is an amphibian"
-    And I log out
     Given I am on the "Test lesson name" "lesson activity" page logged in as student2
     And I should see "Cat is an amphibian"
     And I set the following fields to these values:
@@ -144,7 +141,6 @@ Feature: Lesson group override
       | Password protected lesson | 12345 |
     And I press "Save"
     And I should see "Password protected lesson"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student1
     Then I should see "Test lesson name is a password protected lesson"
     And I should not see "Cat is an amphibian"
@@ -160,7 +156,6 @@ Feature: Lesson group override
     And I press "Submit"
     And I press "Continue"
     And I should see "Congratulations - end of lesson reached"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student2
     And I should see "Test lesson name is a password protected lesson"
     And I should not see "Cat is an amphibian"
@@ -194,11 +189,9 @@ Feature: Lesson group override
       | deadline[minute]    | 00 |
     And I press "Save"
     And I should see "Lesson closes"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student2
     Then the activity date in "Test lesson name" should contain "Closed: Saturday, 1 January 2000, 8:00"
     And I should not see "Cat is an amphibian"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student1
     And I should see "Cat is an amphibian"
 
@@ -225,11 +218,9 @@ Feature: Lesson group override
       | available[minute]    | 00 |
     And I press "Save"
     And I should see "Lesson opens"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student2
     Then the activity date in "Test lesson name" should contain "Opens: Tuesday, 1 January 2030, 8:00"
     And I should not see "Cat is an amphibian"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student1
     And I should see "Cat is an amphibian"
 
@@ -246,7 +237,6 @@ Feature: Lesson group override
       | Maximum number of attempts per question | 2 |
     And I press "Save"
     And I should see "Maximum number of attempts per question"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student1
     And I should see "Cat is an amphibian"
     And I set the following fields to these values:
@@ -259,7 +249,6 @@ Feature: Lesson group override
     And I press "Submit"
     And I press "Continue"
     And I should see "Congratulations - end of lesson reached"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student2
     And I should see "Cat is an amphibian"
     And I set the following fields to these values:
@@ -306,13 +295,10 @@ Feature: Lesson group override
       | available[minute]    | 00 |
     And I press "Save"
     And I should see "Wednesday, 1 January 2031, 8:00"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student1
     And the activity date in "Test lesson name" should contain "Opens: Wednesday, 1 January 2031, 8:00"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student2
     And the activity date in "Test lesson name" should contain "Opens: Sunday, 1 January 2040, 8:00"
-    And I log out
     And I am on the "Test lesson name" "lesson activity" page logged in as student3
     And the activity date in "Test lesson name" should contain "Opens: Tuesday, 1 January 2030, 8:00"
 
@@ -321,8 +307,8 @@ Feature: Lesson group override
       | capability                  | permission | role           | contextlevel | reference |
       | moodle/site:accessallgroups | Prevent    | editingteacher | Course       | C1        |
     And the following "activities" exist:
-      | activity | name     | intro                | course | idnumber | groupmode |
-      | lesson   | Lesson 2 | Lesson 2 description | C1     | lesson2  | 1         |
+      | activity | name     | course | idnumber | groupmode |
+      | lesson   | Lesson 2 | C1     | lesson2  | 1         |
     When I am on the "Lesson 2" "lesson activity" page logged in as teacher1
     And I navigate to "Overrides" in current page administration
     And I select "Group overrides" from the "jump" singleselect
@@ -334,8 +320,8 @@ Feature: Lesson group override
       | capability                  | permission | role           | contextlevel | reference |
       | moodle/site:accessallgroups | Prevent    | editingteacher | Course       | C1        |
     And the following "activities" exist:
-      | activity | name     | intro                | course | idnumber | groupmode |
-      | lesson   | Lesson 2 | Lesson 2 description | C1     | lesson2  | 1         |
+      | activity | name     | course | idnumber | groupmode |
+      | lesson   | Lesson 2 | C1     | lesson2  | 1         |
     And the following "group members" exist:
       | user     | group |
       | teacher1 | G1    |
@@ -351,8 +337,8 @@ Feature: Lesson group override
       | capability                  | permission | role           | contextlevel | reference |
       | moodle/site:accessallgroups | Prevent    | editingteacher | Course       | C1        |
     And the following "activities" exist:
-      | activity | name     | intro                | course | idnumber | groupmode |
-      | lesson   | Lesson 2 | Lesson 2 description | C1     | lesson2  | 1         |
+      | activity | name     | course | idnumber | groupmode |
+      | lesson   | Lesson 2 | C1     | lesson2  | 1         |
     And the following "group members" exist:
       | user     | group |
       | teacher1 | G1    |
@@ -378,9 +364,28 @@ Feature: Lesson group override
       | available[hour]      | 08      |
       | available[minute]    | 00      |
     And I press "Save"
-    And I log out
     When I am on the "Lesson 2" "lesson activity" page logged in as teacher1
     And I navigate to "Overrides" in current page administration
     And I select "Group overrides" from the "jump" singleselect
     Then I should see "Group 1" in the ".generaltable" "css_element"
     And I should not see "Group 2" in the ".generaltable" "css_element"
+
+  Scenario: "Not visible" groups should not be available for group overrides
+    Given the following "groups" exist:
+      | name                                 | course | idnumber | visibility | participation |
+      | Visible to everyone/Participation         | C1     | VP       | 0          | 1             |
+      | Only Only visible to members/Participation     | C1     | MP       | 1          | 1             |
+      | Only see own membership                   | C1     | O        | 2          | 0             |
+      | Not visible                          | C1     | N        | 3          | 0             |
+      | Visible to everyone/Non-Participation     | C1     | VN       | 0          | 0             |
+      | Only visible to members/Non-Participation | C1     | MN       | 1          | 0             |
+    When I am on the "lesson1" Activity page logged in as teacher1
+    And I navigate to "Overrides" in current page administration
+    And I select "Group overrides" from the "jump" singleselect
+    And I follow "Add group override"
+    Then I should see "Visible to everyone/Participation" in the "Override group" "select"
+    And I should see "Visible to everyone/Non-Participation" in the "Override group" "select"
+    And I should see "Only visible to members" in the "Override group" "select"
+    And I should see "Only visible to members/Non-Participation" in the "Override group" "select"
+    And I should see "Only see own membership" in the "Override group" "select"
+    And I should not see "Not visible" in the "Override group" "select"

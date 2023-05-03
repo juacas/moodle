@@ -881,7 +881,7 @@ EXPECTED;
         $url1 = "{$CFG->wwwroot}/draftfile.php/5/user/draft/99999999/test1.jpg";
         $url2 = "{$CFG->wwwroot}/draftfile.php/5/user/draft/99999998/test2.jpg";
 
-        $html = "<p>This is a test.</p><p><img src=\"${url1}\" alt=\"\" role=\"presentation\"></p>
+        $html = "<p>This is a test.</p><p><img src=\"{$url1}\" alt=\"\" role=\"presentation\"></p>
                 <br>Test content.<p></p><p><img src=\"{$url2}\" alt=\"\" width=\"2048\" height=\"1536\"
                 role=\"presentation\" class=\"img-fluid atto_image_button_text-bottom\"><br></p>";
         $draftareas = array(
@@ -1057,8 +1057,8 @@ EXPECTED;
                 '/h5p/js/embed.js'
             ],
             'A Moodle JS resource using the full path including the proper JS Handler' => [
-                new \moodle_url($wwwroot . '/lib/javascript.php/1/lib/editor/tinymce/tiny_mce/M.m.p/tiny_mce.js'),
-                '/lib/javascript.php/1/lib/editor/tinymce/tiny_mce/M.m.p/tiny_mce.js'
+                new \moodle_url($wwwroot . '/lib/javascript.php/1/lib/editor/tiny/js/tinymce/tinymce.js'),
+                '/lib/javascript.php/1/lib/editor/tiny/js/tinymce/tinymce.js'
             ],
         ];
     }
@@ -1109,10 +1109,6 @@ EXPECTED;
             ],
             'H5P JS internal resource' => [
                 new \moodle_url('/h5p/js/embed.js'),
-                true
-            ],
-            'A Moodle JS resource using the full path including the proper JS Handler' => [
-                new \moodle_url($wwwroot . '/lib/javascript.php/1/lib/editor/tinymce/tiny_mce/M.m.p/tiny_mce.js'),
                 true
             ],
         ];

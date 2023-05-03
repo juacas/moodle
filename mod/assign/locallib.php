@@ -94,6 +94,8 @@ require_once($CFG->dirroot . '/mod/assign/renderable.php');
 require_once($CFG->dirroot . '/mod/assign/gradingtable.php');
 require_once($CFG->libdir . '/portfolio/caller.php');
 
+use mod_assign\event\submission_removed;
+use mod_assign\event\submission_status_updated;
 use \mod_assign\output\grading_app;
 use \mod_assign\output\assign_header;
 use \mod_assign\output\assign_submission_status;
@@ -193,6 +195,9 @@ class assign {
     /** @var mixed This var can vary between false for no overrides to a stdClass of the overrides for a group */
     private $overridedata;
 
+    /** @var float grade value. */
+    public $grade;
+
     /**
      * Constructor for the base assign class.
      *
@@ -208,8 +213,6 @@ class assign {
      *                      otherwise this class will load one from the context as required.
      */
     public function __construct($coursemodulecontext, $coursemodule, $course) {
-        global $SESSION;
-
         $this->context = $coursemodulecontext;
         $this->course = $course;
 
@@ -224,10 +227,6 @@ class assign {
 
         // Extra entropy is required for uniqid() to work on cygwin.
         $this->useridlistid = clean_param(uniqid('', true), PARAM_ALPHANUM);
-
-        if (!isset($SESSION->mod_assign_useridlist)) {
-            $SESSION->mod_assign_useridlist = [];
-        }
     }
 
     /**
@@ -2748,7 +2747,7 @@ class assign {
 
                 // Override the language and timezone of the "current" user, so that
                 // mail is customised for the receiver.
-                cron_setup_user($user, $course);
+                \core\cron::setup_user($user, $course);
 
                 // Context lookups are already cached.
                 $coursecontext = context_course::instance($course->id);
@@ -2828,7 +2827,7 @@ class assign {
             }
             mtrace('Done processing ' . count($submissions) . ' assignment submissions');
 
-            cron_setup_user();
+            \core\cron::setup_user();
 
             // Free up memory just to be sure.
             unset($courses);
@@ -3349,7 +3348,7 @@ class assign {
         }
 
         $grouping = $this->get_instance()->teamsubmissiongroupingid;
-        $return = groups_get_all_groups($this->get_course()->id, $userid, $grouping);
+        $return = groups_get_all_groups($this->get_course()->id, $userid, $grouping, 'g.*', false, true);
 
         $this->usergroups[$userid] = $return;
 
@@ -5444,15 +5443,19 @@ class assign {
             $grader = null;
             $gradingmanager = get_grading_manager($this->get_context(), 'mod_assign', 'submissions');
 
+            $gradingcontrollergrade = '';
             if ($hasgrade) {
                 if ($controller = $gradingmanager->get_active_controller()) {
                     $menu = make_grades_menu($this->get_instance()->grade);
                     $controller->set_grade_range($menu, $this->get_instance()->grade > 0);
-                    $gradefordisplay = $controller->render_grade($PAGE,
-                                                                 $grade->id,
-                                                                 $gradingitem,
-                                                                 $gradebookgrade->str_long_grade,
-                                                                 $cangrade);
+                    $gradingcontrollergrade = $controller->render_grade(
+                        $PAGE,
+                        $grade->id,
+                        $gradingitem,
+                        '',
+                        $cangrade
+                    );
+                    $gradefordisplay = $gradebookgrade->str_long_grade;
                 } else {
                     $gradefordisplay = $this->display_grade($gradebookgrade->grade, false);
                 }
@@ -5479,15 +5482,18 @@ class assign {
             if ($grade) {
                 \mod_assign\event\feedback_viewed::create_from_grade($this, $grade)->trigger();
             }
-            $feedbackstatus = new assign_feedback_status($gradefordisplay,
-                                                  $gradeddate,
-                                                  $grader,
-                                                  $this->get_feedback_plugins(),
-                                                  $grade,
-                                                  $this->get_course_module()->id,
-                                                  $this->get_return_action(),
-                                                  $this->get_return_params(),
-                                                  $viewfullnames);
+            $feedbackstatus = new assign_feedback_status(
+                $gradefordisplay,
+                $gradeddate,
+                $grader,
+                $this->get_feedback_plugins(),
+                $grade,
+                $this->get_course_module()->id,
+                $this->get_return_action(),
+                $this->get_return_params(),
+                $viewfullnames,
+                $gradingcontrollergrade
+            );
 
             // Show the grader's identity if 'Hide Grader' is disabled or has the 'Show Hidden Grader' capability.
             $showgradername = (
@@ -8217,6 +8223,7 @@ class assign {
      *
      * @param int $userid
      * @return boolean
+     * @throws coding_exception
      */
     public function remove_submission($userid) {
         global $USER;
@@ -8254,9 +8261,8 @@ class assign {
             $completion->update_state($this->get_course_module(), COMPLETION_INCOMPLETE, $userid);
         }
 
-        if ($submission->userid != 0) {
-            \mod_assign\event\submission_status_updated::create_from_submission($this, $submission)->trigger();
-        }
+        submission_removed::create_from_submission($this, $submission)->trigger();
+        submission_status_updated::create_from_submission($this, $submission)->trigger();
         return true;
     }
 
@@ -9345,6 +9351,13 @@ class assign {
      * @return string The key for the id, or new entry if no $id is passed.
      */
     public function get_useridlist_key($id = null) {
+        global $SESSION;
+
+        // Ensure the user id list cache is initialised.
+        if (!isset($SESSION->mod_assign_useridlist)) {
+            $SESSION->mod_assign_useridlist = [];
+        }
+
         if ($id === null) {
             $id = $this->get_useridlist_key_id();
         }
@@ -9616,8 +9629,8 @@ class assign {
      * Get the correct submission statement depending on single submisison, team submission or team submission
      * where all team memebers must submit.
      *
-     * @param array $adminconfig
-     * @param assign $instance
+     * @param stdClass $adminconfig
+     * @param stdClass $instance
      * @param context $context
      *
      * @return string

@@ -1319,6 +1319,30 @@ class completionlib_test extends advanced_testcase {
         $this->assertEquals(
             COMPLETION_COMPLETE,
             completion_info::internal_get_grade_state($item, $grade));
+
+        // Item is hidden, but returnpassfail is true and the grade is passing.
+        $item->hidden = 1;
+        $item->gradepass = 4;
+        $grade->finalgrade = 5.0;
+        $this->assertEquals(
+            COMPLETION_COMPLETE_PASS,
+            completion_info::internal_get_grade_state($item, $grade, true));
+
+        // Item is hidden, but returnpassfail is true and the grade is failing.
+        $item->hidden = 1;
+        $item->gradepass = 4;
+        $grade->finalgrade = 3.0;
+        $this->assertEquals(
+            COMPLETION_COMPLETE_FAIL_HIDDEN,
+            completion_info::internal_get_grade_state($item, $grade, true));
+
+        // Item is not hidden, but returnpassfail is true and the grade is failing.
+        $item->hidden = 0;
+        $item->gradepass = 4;
+        $grade->finalgrade = 3.0;
+        $this->assertEquals(
+            COMPLETION_COMPLETE_FAIL,
+            completion_info::internal_get_grade_state($item, $grade, true));
     }
 
     /**
@@ -1465,7 +1489,6 @@ class completionlib_test extends advanced_testcase {
         $this->assertEquals($USER->id, $event->userid);
         $this->assertEquals($this->user->id, $event->relateduserid);
         $this->assertInstanceOf('moodle_url', $event->get_url());
-        $this->assertEventLegacyData($current, $event);
     }
 
     /**
@@ -1495,8 +1518,6 @@ class completionlib_test extends advanced_testcase {
         $this->assertEquals($this->user->id, $event->relateduserid);
         $this->assertEquals(context_course::instance($this->course->id), $event->get_context());
         $this->assertInstanceOf('moodle_url', $event->get_url());
-        $data = $ccompletion->get_record_data();
-        $this->assertEventLegacyData($data, $event);
     }
 
     /**
@@ -1553,8 +1574,6 @@ class completionlib_test extends advanced_testcase {
         $this->assertEquals($this->course->id, $event->courseid);
         $this->assertEquals($coursecontext, $event->get_context());
         $this->assertInstanceOf('moodle_url', $event->get_url());
-        $expectedlegacylog = array($this->course->id, 'course', 'completion updated', 'completion.php?id='.$this->course->id);
-        $this->assertEventLegacyLogData($expectedlegacylog, $event);
     }
 
     /**

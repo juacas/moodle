@@ -530,8 +530,8 @@ function enrol_add_course_navigation(navigation_node $coursenode, $course) {
                 }
                 $plugin = $plugins[$instance->enrol];
                 if ($unenrollink = $plugin->get_unenrolself_link($instance)) {
-                    $shortname = format_string($course->shortname, true, array('context' => $coursecontext));
-                    $coursenode->add(get_string('unenrolme', 'core_enrol', $shortname), $unenrollink, navigation_node::TYPE_SETTING, null, 'unenrolself', new pix_icon('i/user', ''));
+                    $coursenode->add(get_string('unenrolme', 'core_enrol'), $unenrollink,
+                        navigation_node::TYPE_SETTING, null, 'unenrolself', new pix_icon('i/user', ''));
                     $coursenode->get('unenrolself')->set_force_into_more_menu(true);
                     break;
                     //TODO. deal with multiple unenrol links - not likely case, but still...
@@ -2426,7 +2426,7 @@ abstract class enrol_plugin {
     /**
      * Returns list of unenrol links for all enrol instances in course.
      *
-     * @param int $instance
+     * @param stdClass $instance
      * @return moodle_url or NULL if self unenrolment not supported
      */
     public function get_unenrolself_link($instance) {
@@ -2708,7 +2708,7 @@ abstract class enrol_plugin {
      * for enrolment, name of enrolment plugin etc.
      *
      * @param stdClass $instance enrolment instance
-     * @return array instance info.
+     * @return stdClass|null instance info.
      */
     public function get_enrol_info(stdClass $instance) {
         return null;

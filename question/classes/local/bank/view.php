@@ -266,7 +266,7 @@ class view {
                 'creator_name_column',
                 'comment_count_column'
         ];
-        if (question_get_display_preference('qbshowtext', 0, PARAM_BOOL, new \moodle_url(''))) {
+        if (question_get_display_preference('qbshowtext', 0, PARAM_INT, new \moodle_url(''))) {
             $corequestionbankcolumns[] = 'question_text_row';
         }
 
@@ -1256,5 +1256,14 @@ class view {
      */
     public function get_visiblecolumns(): array {
         return $this->visiblecolumns;
+    }
+
+    /**
+     * Is this view showing separate versions of a question?
+     *
+     * @return bool
+     */
+    public function is_listing_specific_versions(): bool {
+        return false;
     }
 }

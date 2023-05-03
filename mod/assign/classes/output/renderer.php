@@ -39,6 +39,9 @@ use \mod_assign\output\grading_app;
  */
 class renderer extends \plugin_renderer_base {
 
+    /** @var string a unique ID. */
+    public $htmlid;
+
     /**
      * Rendering assignment files
      *
@@ -46,8 +49,8 @@ class renderer extends \plugin_renderer_base {
      * @param int $userid
      * @param string $filearea
      * @param string $component
-     * @param stdClass $course
-     * @param stdClass $coursemodule
+     * @param \stdClass $course
+     * @param \stdClass $coursemodule
      * @return string
      */
     public function assign_files(\context $context, $userid, $filearea, $component, $course = null, $coursemodule = null) {
@@ -448,6 +451,11 @@ class renderer extends \plugin_renderer_base {
         $o .= \html_writer::table($t);
         $o .= $this->output->box_end();
 
+        if (!empty($status->gradingcontrollergrade)) {
+            $o .= $this->output->heading(get_string('gradebreakdown', 'assign'), 4);
+            $o .= $status->gradingcontrollergrade;
+        }
+
         $o .= $this->output->container_end();
         return $o;
     }
@@ -813,13 +821,6 @@ class renderer extends \plugin_renderer_base {
             $this->add_table_row_tuple($t, $cell1content, $cell2content, [], $cell2attributes);
         }
 
-        // Grading criteria preview.
-        if (!empty($status->gradingcontrollerpreview)) {
-            $cell1content = get_string('gradingmethodpreview', 'assign');
-            $cell2content = $status->gradingcontrollerpreview;
-            $this->add_table_row_tuple($t, $cell1content, $cell2content, [], []);
-        }
-
         // Last modified.
         if ($submission) {
             $cell1content = get_string('timemodified', 'assign');
@@ -859,6 +860,12 @@ class renderer extends \plugin_renderer_base {
         $o .= $warningmsg;
         $o .= \html_writer::table($t);
         $o .= $this->output->box_end();
+
+        // Grading criteria preview.
+        if (!empty($status->gradingcontrollerpreview)) {
+            $o .= $this->output->heading(get_string('gradingmethodpreview', 'assign'), 4);
+            $o .= $status->gradingcontrollerpreview;
+        }
 
         $o .= $this->output->container_end();
         return $o;

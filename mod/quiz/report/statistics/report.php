@@ -196,7 +196,7 @@ class quiz_statistics_report extends report_base {
                 $this->output_quiz_structure_analysis_table($questionstats);
 
                 if ($this->table->is_downloading() == 'html' && $quizstats->s() != 0) {
-                    $this->output_statistics_graph($quiz->id, $qubaids);
+                    $this->output_statistics_graph($quiz, $qubaids);
                 }
 
                 $this->output_all_question_response_analysis($qubaids, $questions, $questionstats, $reporturl, $whichtries);
@@ -537,17 +537,11 @@ class quiz_statistics_report extends report_base {
     /**
      * Output the HTML needed to show the statistics graph.
      *
-     * @param int|object $quizorid The quiz, or its ID.
+     * @param stdClass $quiz the quiz.
      * @param qubaid_condition $qubaids the question usages whose responses to analyse.
-     * @param string $whichattempts Which attempts constant.
      */
-    protected function output_statistics_graph($quizorid, $qubaids) {
+    protected function output_statistics_graph($quiz, $qubaids) {
         global $DB, $PAGE;
-
-        $quiz = $quizorid;
-        if (!is_object($quiz)) {
-            $quiz = $DB->get_record('quiz', ['id' => $quizorid], '*', MUST_EXIST);
-        }
 
         // Load the rest of the required data.
         $questions = quiz_report_get_significant_questions($quiz);
@@ -768,7 +762,8 @@ class quiz_statistics_report extends report_base {
      *
      * @param int    $lastcachetime  the time the stats were last cached.
      * @param int    $quizid         the quiz id.
-     * @param array  $groupstudentsjoins (joins, wheres, params) for students in the group or empty array if groups not used.
+     * @param \core\dml\sql_join $groupstudentsjoins (joins, wheres, params) for students in the group
+     *                                   or empty array if groups not used.
      * @param string $whichattempts which attempts to use, represented internally as one of the constants as used in
      *                                   $quiz->grademethod ie.
      *                                   QUIZ_GRADEAVERAGE, QUIZ_GRADEHIGHEST, QUIZ_ATTEMPTLAST or QUIZ_ATTEMPTFIRST
@@ -835,33 +830,29 @@ class quiz_statistics_report extends report_base {
     public function load_and_initialise_questions_for_calculations($quiz) {
         // Load the questions.
         $questions = quiz_report_get_significant_questions($quiz);
-        $questionids = [];
-        $randomquestions = [];
+        $questiondata = [];
         foreach ($questions as $qs => $question) {
             if ($question->qtype === 'random') {
                 $question->id = 0;
                 $question->name = get_string('random', 'quiz');
                 $question->questiontext = get_string('random', 'quiz');
                 $question->parenttype = 'random';
-                $randomquestions [] = $question;
-                unset($questions[$qs]);
-                continue;
+                $questiondata[$question->slot] = $question;
+            } else if ($question->qtype === 'missingtype') {
+                $question->id = is_numeric($question->id) ? (int) $question->id : 0;
+                $questiondata[$question->slot] = $question;
+                $question->name = get_string('deletedquestion', 'qtype_missingtype');
+                $question->questiontext = get_string('deletedquestiontext', 'qtype_missingtype');
+            } else {
+                $q = question_bank::load_question_data($question->id);
+                $q->maxmark = $question->maxmark;
+                $q->slot = $question->slot;
+                $q->number = $question->number;
+                $q->parenttype = null;
+                $questiondata[$question->slot] = $q;
             }
-            $questionids[] = $question->id;
         }
-        $fullquestions = question_load_questions($questionids);
-        foreach ($questions as $qno => $question) {
-            $q = $fullquestions[$question->id];
-            $q->maxmark = $question->maxmark;
-            $q->slot = $question->slot;
-            $q->number = $question->number;
-            $q->parenttype = null;
-            $questiondata[$question->slot] = $q;
-        }
-        foreach ($randomquestions as $randomquestion) {
-            $questiondata[$randomquestion->slot] = $randomquestion;
-        }
-        ksort($questiondata);
+
         return $questiondata;
     }
 

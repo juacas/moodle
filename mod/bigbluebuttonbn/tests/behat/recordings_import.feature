@@ -7,7 +7,7 @@ Feature: Manage and list recordings
     And the following config values are set as admin:
       | bigbluebuttonbn_importrecordings_enabled | 1 |
       | bigbluebuttonbn_importrecordings_from_deleted_enabled | 1 |
-    And I enable "bigbluebuttonbn" "mod" plugin
+    And I accept dpa and enable bigbluebuttonbn plugin
     And the following "courses" exist:
       | fullname      | shortname | category |
       | Test Course 1 | C1        | 0        |
@@ -57,6 +57,7 @@ Feature: Manage and list recordings
   Scenario: I check that I can import recordings into the Recording activity and then if I delete them
   they are back into the pool to be imported again
     When I am on the "RoomRecordings1" "bigbluebuttonbn activity" page logged in as "admin"
+    And I change window size to "large"
     And I click on "Import recording links" "button"
     And I select "Test Course 1 (C1)" from the "sourcecourseid" singleselect
     And I select "RoomRecordings" from the "sourcebn" singleselect

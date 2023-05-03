@@ -375,14 +375,28 @@ class accesslib_test extends advanced_testcase {
 
         $this->resetAfterTest();
 
+        // Create role and get event.
+        $sink = $this->redirectEvents();
         $id = create_role('New student role', 'student2', 'New student description', 'student');
-        $role = $DB->get_record('role', array('id'=>$id));
+        $events = $sink->get_events();
+        $sink->close();
+        $event = array_pop($events);
+        $role = $DB->get_record('role', ['id' => $id]);
 
         $this->assertNotEmpty($role);
         $this->assertSame('New student role', $role->name);
         $this->assertSame('student2', $role->shortname);
         $this->assertSame('New student description', $role->description);
         $this->assertSame('student', $role->archetype);
+
+        // Test triggered event.
+        $this->assertInstanceOf('\core\event\role_created', $event);
+        $this->assertSame('role', $event->target);
+        $this->assertSame('role', $event->objecttable);
+        $this->assertSame((int)$role->id, $event->objectid);
+        $this->assertEquals(context_system::instance(), $event->get_context());
+        $this->assertSame($role->shortname, $event->other['shortname']);
+        $this->assertSame($role->archetype, $event->other['archetype']);
     }
 
     /**
@@ -567,12 +581,6 @@ class accesslib_test extends advanced_testcase {
         $this->assertSame('', $event->other['component']);
         $this->assertEquals(0, $event->other['itemid']);
         $this->assertInstanceOf('moodle_url', $event->get_url());
-        $this->assertSame('role_assigned', $event::get_legacy_eventname());
-        $roles = get_all_roles();
-        $rolenames = role_fix_names($roles, $context, ROLENAME_ORIGINAL, true);
-        $expectedlegacylog = array($course->id, 'role', 'assign',
-            'admin/roles/assign.php?contextid='.$context->id.'&roleid='.$role->id, $rolenames[$role->id], '', $USER->id);
-        $this->assertEventLegacyLogData($expectedlegacylog, $event);
     }
 
     /**
@@ -619,11 +627,6 @@ class accesslib_test extends advanced_testcase {
         $this->assertSame('', $event->other['component']);
         $this->assertEquals(0, $event->other['itemid']);
         $this->assertInstanceOf('moodle_url', $event->get_url());
-        $roles = get_all_roles();
-        $rolenames = role_fix_names($roles, $context, ROLENAME_ORIGINAL, true);
-        $expectedlegacylog = array($course->id, 'role', 'unassign',
-            'admin/roles/assign.php?contextid='.$context->id.'&roleid='.$role->id, $rolenames[$role->id], '', $USER->id);
-        $this->assertEventLegacyLogData($expectedlegacylog, $event);
     }
 
     /**
@@ -771,10 +774,6 @@ class accesslib_test extends advanced_testcase {
         $this->assertSame($role->shortname, $event->other['shortname']);
         $this->assertSame($role->description, $event->other['description']);
         $this->assertSame($role->archetype, $event->other['archetype']);
-
-        $expectedlegacylog = array(SITEID, 'role', 'delete', 'admin/roles/manage.php?action=delete&roleid='.$role->id,
-                                   $role->shortname, '');
-        $this->assertEventLegacyLogData($expectedlegacylog, $event);
     }
 
     /**
@@ -1060,10 +1059,6 @@ class accesslib_test extends advanced_testcase {
         $sink->close();
         $event = array_pop($events);
         $this->assertInstanceOf('\core\event\role_allow_assign_updated', $event);
-        $mode = 'assign';
-        $baseurl = new moodle_url('/admin/roles/allow.php', array('mode' => $mode));
-        $expectedlegacylog = array(SITEID, 'role', 'edit allow ' . $mode, str_replace($CFG->wwwroot . '/', '', $baseurl));
-        $this->assertEventLegacyLogData($expectedlegacylog, $event);
     }
 
     /**
@@ -1095,10 +1090,6 @@ class accesslib_test extends advanced_testcase {
         $sink->close();
         $event = array_pop($events);
         $this->assertInstanceOf('\core\event\role_allow_override_updated', $event);
-        $mode = 'override';
-        $baseurl = new moodle_url('/admin/roles/allow.php', array('mode' => $mode));
-        $expectedlegacylog = array(SITEID, 'role', 'edit allow ' . $mode, str_replace($CFG->wwwroot . '/', '', $baseurl));
-        $this->assertEventLegacyLogData($expectedlegacylog, $event);
     }
 
     /**
@@ -1130,10 +1121,6 @@ class accesslib_test extends advanced_testcase {
         $sink->close();
         $event = array_pop($events);
         $this->assertInstanceOf('\core\event\role_allow_switch_updated', $event);
-        $mode = 'switch';
-        $baseurl = new moodle_url('/admin/roles/allow.php', array('mode' => $mode));
-        $expectedlegacylog = array(SITEID, 'role', 'edit allow ' . $mode, str_replace($CFG->wwwroot . '/', '', $baseurl));
-        $this->assertEventLegacyLogData($expectedlegacylog, $event);
     }
 
     /**
@@ -1165,10 +1152,6 @@ class accesslib_test extends advanced_testcase {
         $sink->close();
         $event = array_pop($events);
         $this->assertInstanceOf('\core\event\role_allow_view_updated', $event);
-        $mode = 'view';
-        $baseurl = new moodle_url('/admin/roles/allow.php', array('mode' => $mode));
-        $expectedlegacylog = array(SITEID, 'role', 'edit allow ' . $mode, str_replace($CFG->wwwroot . '/', '', $baseurl));
-        $this->assertEventLegacyLogData($expectedlegacylog, $event);
     }
 
     /**
@@ -5207,7 +5190,7 @@ class accesslib_test extends advanced_testcase {
 /**
  * Context caching fixture
  */
-class context_inspection extends context_helper {
+abstract class context_inspection extends \core\context_helper {
     public static function test_context_cache_size() {
         return self::$cache_count;
     }

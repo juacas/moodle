@@ -38,6 +38,111 @@ require_once($CFG->dirroot . '/mod/wiki/lib.php');
  */
 class externallib_test extends externallib_advanced_testcase {
 
+    /** @var \stdClass course record. */
+    protected $course;
+
+    /** @var \stdClass activity record. */
+    protected $wiki;
+
+    /** @var \stdClass activity record. */
+    protected $wikisep;
+
+    /** @var \stdClass activity record. */
+    protected $wikivis;
+
+    /** @var \stdClass activity record. */
+    protected $wikisepind;
+
+    /** @var \stdClass activity record. */
+    protected $wikivisind;
+
+    /** @var \context_module context instance. */
+    protected $context;
+
+    /** @var \StdClass */
+    protected $cm;
+
+    /** @var \stdClass user record. */
+    protected $student;
+
+    /** @var \stdClass user record. */
+    protected $student2;
+
+    /** @var \stdClass user record. */
+    protected $teacher;
+
+    /** @var mixed a fieldset object, false or exception if error not found. */
+    protected $studentrole;
+
+    /** @var mixed a fieldset object, false or exception if error not found. */
+    protected $teacherrole;
+
+    /** @var \stdClass first page. */
+    protected $firstpage;
+
+    /** @var \stdClass group record */
+    protected $group1;
+
+    /** @var \stdClass group record */
+    protected $group2;
+
+    /** @var \stdClass first page. */
+    protected $fpsepg1;
+
+    /** @var \stdClass first page. */
+    protected $fpsepg2;
+
+    /** @var \stdClass first page. */
+    protected $fpsepall;
+
+    /** @var \stdClass first page. */
+    protected $fpvisg1;
+
+    /** @var \stdClass first page. */
+    protected $fpvisg2;
+
+    /** @var \stdClass first page. */
+    protected $fpvisall;
+
+    /** @var \stdClass first page. */
+    protected $fpsepg1indt;
+
+    /** @var \stdClass first page. */
+    protected $fpsepg2indt;
+
+    /** @var \stdClass first page. */
+    protected $fpsepallindt;
+
+    /** @var \stdClass first page. */
+    protected $fpvisg1indt;
+
+    /** @var \stdClass first page. */
+    protected $fpvisg2indt;
+
+    /** @var \stdClass first page. */
+    protected $fpvisallindt;
+
+    /** @var \stdClass first page. */
+    protected $fpsepg1indstu;
+
+    /** @var \stdClass first page. */
+    protected $fpvisg1indstu;
+
+    /** @var \stdClass first page. */
+    protected $fpsepg1indstu2;
+
+    /** @var \stdClass first page. */
+    protected $fpvisg1indstu2;
+
+    /** @var \stdClass user record. */
+    protected $studentnotincourse;
+
+    /** @var \stdClass course record. */
+    protected $anothercourse;
+
+    /** @var \stdClass group record. */
+    protected $groupnotincourse;
+
     /**
      * Set up for every test
      */
@@ -647,15 +752,7 @@ class externallib_test extends externallib_advanced_testcase {
 
         // Check that WS doesn't return page content if includecontent is false, it returns the size instead.
         foreach ($expectedpages as $i => $expectedpage) {
-            $expectedpages[$i]['contentsize'] = strlen($expectedpages[$i]['cachedcontent']);
-            // TODO: Remove this block of code once PHP 8.0 is the min version supported.
-            // For PHP < 8.0, if strlen() was overloaded, calculate
-            // the bytes using mb_strlen(..., '8bit').
-            if (PHP_VERSION_ID < 80000) {
-                if (function_exists('mb_strlen') && ((int)ini_get('mbstring.func_overload') & 2)) {
-                    $expectedpages[$i]['contentsize'] = mb_strlen($expectedpages[$i]['cachedcontent'], '8bit');
-                }
-            }
+            $expectedpages[$i]['contentsize'] = \core_text::strlen($expectedpages[$i]['cachedcontent']);
             unset($expectedpages[$i]['cachedcontent']);
             unset($expectedpages[$i]['contentformat']);
         }

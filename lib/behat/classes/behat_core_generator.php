@@ -259,6 +259,11 @@ class behat_core_generator extends behat_generator_base {
                 'datagenerator' => 'customlang',
                 'required' => ['component', 'stringid', 'value'],
             ],
+            'language packs' => [
+                'singular' => 'language pack',
+                'datagenerator' => 'langpack',
+                'required' => ['language'],
+            ],
             'analytics models' => [
                 'singular' => 'analytics model',
                 'datagenerator' => 'analytics_model',
@@ -549,6 +554,16 @@ class behat_core_generator extends behat_generator_base {
             tool_customlang_utils::checkin($USER->lang);
         }
     }
+    /**
+     * Imports a langpack.
+     *
+     * @param array $data
+     */
+    protected function process_langpack($data) {
+        $controller = new \tool_langimport\controller();
+        $controller->install_languagepacks($data['language']);
+        get_string_manager()->reset_caches();
+    }
 
     /**
      * Adapter to enrol_user() data generator.
@@ -751,7 +766,9 @@ class behat_core_generator extends behat_generator_base {
         }
 
         $data['contextid'] = $context->id;
-        $this->datagenerator->get_plugin_generator('core_question')->create_question_category($data);
+        /** @var core_question_generator $qgenerator */
+        $qgenerator = $this->datagenerator->get_plugin_generator('core_question');
+        $qgenerator->create_question_category($data);
     }
 
     /**
@@ -798,7 +815,9 @@ class behat_core_generator extends behat_generator_base {
             $missingtypespecialcase = true;
         }
 
-        $questiondata = $this->datagenerator->get_plugin_generator('core_question')
+        /** @var core_question_generator $qgenerator */
+        $qgenerator = $this->datagenerator->get_plugin_generator('core_question');
+        $questiondata = $qgenerator
             ->create_question($data['qtype'], $which, $data);
 
         if ($missingtypespecialcase) {
@@ -947,7 +966,7 @@ class behat_core_generator extends behat_generator_base {
     /**
      * Creates an analytics model
      *
-     * @param target $data
+     * @param array $data target
      * @return void
      */
     protected function process_analytics_model($data) {
