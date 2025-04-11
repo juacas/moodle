@@ -58,9 +58,13 @@ class edit_template_action_bar extends base_action_bar {
         $items['left'][]['actionlink'] = new action_link($templateurl, get_string('back'), null, ['class' => 'btn btn-secondary']);
 
         if (has_capability('mod/feedback:edititems', $this->context)) {
-            $items['usetemplate'] = $this->urlparams + [
-                'templateid' => $this->templateid
-            ];
+            // JPC: Do not show the "Use this template" button if the feedback is locked.
+            $feedbackstructure = new \mod_feedback_structure($this->feedback, $this->context);
+            if ($feedbackstructure->is_locked() == false) {
+                $items['usetemplate'] = $this->urlparams + [
+                    'templateid' => $this->templateid
+                ];
+            }
         }
 
         $template = $DB->get_record('feedback_template', array('id' => $this->templateid), '*', MUST_EXIST);

@@ -66,6 +66,10 @@ $actionbar = new \mod_feedback\output\edit_template_action_bar($cm->id, $templat
 $renderer = $PAGE->get_renderer('mod_feedback');
 
 echo $OUTPUT->header();
+// JPC: Notify the user that the feedback is locked.
+if ($feedbackstructure->is_locked()) {
+    echo $OUTPUT->notification(get_string('feedbacklocked', 'feedback'), \core\output\notification::NOTIFY_INFO);
+}
 echo $renderer->main_action_bar($actionbar);
 
 $form = new mod_feedback_complete_form(mod_feedback_complete_form::MODE_VIEW_TEMPLATE,

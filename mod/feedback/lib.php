@@ -30,6 +30,9 @@ require_once($CFG->libdir.'/formslib.php');
 
 define('FEEDBACK_ANONYMOUS_YES', 1);
 define('FEEDBACK_ANONYMOUS_NO', 2);
+// JPC anon
+define('FEEDBACK_ANONYMOUS_TRULY', 3);
+// JPC
 define('FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP', 2);
 define('FEEDBACK_DECIMAL', '.');
 define('FEEDBACK_THOUSAND', ',');
@@ -220,7 +223,7 @@ function feedback_pluginfile($course, $cm, $context, $filearea, $args, $forcedow
         if (isset($CFG->feedback_allowfullanonymous)
                     AND $CFG->feedback_allowfullanonymous
                     AND $course->id == SITEID
-                    AND $feedback->anonymous == FEEDBACK_ANONYMOUS_YES ) {
+                    AND $feedback->anonymous != FEEDBACK_ANONYMOUS_NO ) {
             $canload = true;
         }
 
@@ -1326,6 +1329,13 @@ function feedback_items_from_template($feedback, $templateid, $deleteold = false
     $cm = get_coursemodule_from_instance('feedback', $feedback->id);
     $f_context = context_module::instance($cm->id);
 
+    // JPC: If feedback is locked avoid aplying the template.
+    $feedbackstructure = new \mod_feedback_structure($feedback, $f_context);
+    if ($feedbackstructure->is_locked()) {
+        throw new moodle_exception('feedbacklocked', 'feedback');
+    };
+    // JPC: End of patch.
+
     //if deleteold then delete all old items before
     //get all items
     if ($deleteold) {
@@ -1932,14 +1942,38 @@ function feedback_save_tmp_values($feedbackcompletedtmp, ?stdClass $feedbackcomp
         if ($check) {
             unset($value->id);
             $value->completed = $feedbackcompleted->id;
-            $DB->insert_record('feedback_value', $value);
+            $value->id = $DB->insert_record('feedback_value', $value);
         }
     }
     //drop all the tmpvalues
     $DB->delete_records('feedback_valuetmp', array('completed'=>$tmpcplid));
     $DB->delete_records('feedback_completedtmp', array('id'=>$tmpcplid));
+// JPC Anonymize feedback responses.
+    $params = array('id'=>$feedbackcompleted->feedback);
+    $trulyanon = $DB->get_field('feedback', 'anonymous', $params) == FEEDBACK_ANONYMOUS_TRULY;
+// Decorrelation Phase: Shuffle the ordering and break completion FK of mdl_feedback_value
+    if ($trulyanon) {
+        /** @global moodle_database $DB */
+        $trans = $DB->start_delegated_transaction();
+        list($idsql, $idparams) = $DB->get_in_or_equal(array_keys($allitems), SQL_PARAMS_NAMED);
+        $sql = "SELECT * FROM {feedback_value} v WHERE v.item ".$idsql;
+        $values = $DB->get_records_sql($sql, $idparams);
+        // JPC: Reassign ids to de-correlate ordering.
+        $valkeys = array_keys($values);
+        shuffle($values);
+        // JPC: After shuffle, keys are numbered from 0 to N.
+        foreach ($values as $key => $value) {
+            $value->id = $valkeys[$key];
+            // JPC: Clear trazability for anonymity. Use negative Ids to avoid uniqueness conflict.
+            $value->completed = - $value->id;
+        }
+        $DB->delete_records_list('feedback_value', 'id', $valkeys);
+        $DB->insert_records('feedback_value', $values);
+        $trans->allow_commit();
+    }
+// JPC end
 
-    // Trigger event for the delete action we performed.
+// Trigger event for the delete action we performed.
     $cm = get_coursemodule_from_instance('feedback', $feedbackcompleted->feedback);
     $event = \mod_feedback\event\response_submitted::create_from_record($feedbackcompleted, $cm);
     $event->trigger();
@@ -2189,7 +2223,8 @@ function feedback_get_group_values($item,
         }
     }
     $params = array('id'=>$item->feedback);
-    if ($DB->get_field('feedback', 'anonymous', $params) == FEEDBACK_ANONYMOUS_YES) {
+// JPC Anonymized feedback.
+    if ($DB->get_field('feedback', 'anonymous', $params) != FEEDBACK_ANONYMOUS_NO) {
         if (is_array($values)) {
             shuffle($values);
         }
@@ -2823,19 +2858,22 @@ function feedback_extend_settings_navigation(settings_navigation $settings, navi
     $feedback = $settings->get_page()->activityrecord;
     if ($feedback->course == SITEID) {
         $analysisnode = navigation_node::create(get_string('analysis', 'feedback'),
-            new moodle_url('/mod/feedback/analysis_course.php', ['id' => $settings->get_page()->cm->id]),
-            navigation_node::TYPE_CUSTOM, null, 'feedbackanalysis');
+        new moodle_url('/mod/feedback/analysis_course.php', ['id' => $settings->get_page()->cm->id]),
+        navigation_node::TYPE_CUSTOM, null, 'feedbackanalysis');
     } else {
         $analysisnode = navigation_node::create(get_string('analysis', 'feedback'),
-            new moodle_url('/mod/feedback/analysis.php', ['id' => $settings->get_page()->cm->id]),
-            navigation_node::TYPE_CUSTOM, null, 'feedbackanalysis');
+        new moodle_url('/mod/feedback/analysis.php', ['id' => $settings->get_page()->cm->id]),
+        navigation_node::TYPE_CUSTOM, null, 'feedbackanalysis');
     }
 
     if (has_capability('mod/feedback:viewreports', $context)) {
         $feedbacknode->add_node($analysisnode);
-        $feedbacknode->add(get_string(($hassecondary ? 'responses' : 'show_entries'), 'feedback'),
+        // JPC: Only shows the show_entries link if the feedback is not anonymous_truly.
+        if ($feedback->anonymous != FEEDBACK_ANONYMOUS_TRULY) {
+            $feedbacknode->add(get_string(($hassecondary ? 'responses' : 'show_entries'), 'feedback'),
             new moodle_url('/mod/feedback/show_entries.php', ['id' => $settings->get_page()->cm->id]),
             navigation_node::TYPE_CUSTOM, null, 'responses');
+        }
     } else {
         $feedbackcompletion = new mod_feedback_completion($feedback, $context, $settings->get_page()->course->id);
         if ($feedbackcompletion->can_view_analysis()) {

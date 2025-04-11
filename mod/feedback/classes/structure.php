@@ -154,6 +154,11 @@ class mod_feedback_structure {
             $idx = 1;
             foreach ($this->allitems as $id => $item) {
                 $this->allitems[$id]->itemnr = $item->hasvalue ? ($idx++) : null;
+                // JPC: Ignore pagebreaks if feedback is ANONYMOUS_TRULY.
+                // PageBreak forces temporal storage of responses which breaks anonymity for a while.
+                if ($this->feedback->anonymous == FEEDBACK_ANONYMOUS_TRULY && $item->typ == 'pagebreak') { 
+                    unset($this->allitems[$id]);
+                }
             }
         }
         if ($hasvalueonly && $this->allitems) {
@@ -181,7 +186,27 @@ class mod_feedback_structure {
      * @return bool
      */
     public function is_anonymous() {
-        return $this->feedback->anonymous == FEEDBACK_ANONYMOUS_YES;
+        return $this->feedback->anonymous != FEEDBACK_ANONYMOUS_NO; // JPC: Includes FEEDBACK_ANONYMOUS_YES and FEEDBACK_ANONYMOUS_TRULY.
+    }
+    /**
+     * JPC: Determines if the feedback structure should be read-only
+     * If mode is ANONYMOUS_TRULY and there is any response, the feedback is locked.
+     * @return boolean
+     */
+    function is_locked() {
+        $feedbacklocked = false;
+        $cm = $this->get_cm();
+        $feedback = $this->get_feedback();
+        if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULY ) {
+            $mygroupid = 0; // Don't separate by groups.
+        } else {
+            $mygroupid = groups_get_activity_group($cm, true);
+        }
+        $responses = $this->count_completed_responses($mygroupid);
+        if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULY && $responses >0) {
+            $feedbacklocked = true;
+        }
+        return $feedbacklocked;
     }
 
     /**

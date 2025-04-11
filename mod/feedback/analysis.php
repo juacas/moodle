@@ -64,8 +64,16 @@ echo $OUTPUT->heading(get_string('analysis', 'mod_feedback'), 3);
 $mygroupid = groups_get_activity_group($cm, true);
 groups_print_activity_menu($cm, $url);
 
+$check_anonymously = true;
+// JPC: Next check was done only in group mode. Now it is checked in every analysis.
+if ($feedback->anonymous != FEEDBACK_ANONYMOUS_NO) { //JPC
+    $completedcount = $feedbackstructure->count_completed_responses($mygroupid);
+    if ($completedcount < FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
+        $check_anonymously = false;
+    }
+}
 // Button "Export to excel".
-if (has_capability('mod/feedback:viewreports', $context) && $feedbackstructure->get_items()) {
+if (has_capability('mod/feedback:viewreports', $context) && $check_anonymously && $feedbackstructure->get_items()) {
     echo $OUTPUT->container_start('form-buttons');
     $aurl = new moodle_url('/mod/feedback/analysis_to_excel.php', ['sesskey' => sesskey(), 'id' => $id]);
     echo $OUTPUT->single_button($aurl, get_string('export_to_excel', 'feedback'));
@@ -79,16 +87,13 @@ echo $OUTPUT->render_from_template('mod_feedback/summary', $summary->export_for_
 // Get the items of the feedback.
 $items = $feedbackstructure->get_items(true);
 
-$check_anonymously = true;
-if ($mygroupid > 0 AND $feedback->anonymous == FEEDBACK_ANONYMOUS_YES) {
-    $completedcount = $feedbackstructure->count_completed_responses($mygroupid);
-    if ($completedcount < FEEDBACK_MIN_ANONYMOUS_COUNT_IN_GROUP) {
-        $check_anonymously = false;
-    }
-}
-
 echo '<div>';
-if ($check_anonymously) {
+// JPC: Truly anonymous does not allow to check evolution of statistics while running the voting.
+if ($feedback->anonymous == FEEDBACK_ANONYMOUS_TRULY && ($feedback->timeclose == 0 OR $feedback->timeclose > time())) {
+    echo $OUTPUT->heading_with_help(get_string('anonymous_voting_undergoing', 'feedback'),
+                                    'anonymous_voting_undergoing',
+                                    'feedback', '', '', 3);
+} else if ($check_anonymously) {
     // Print the items in an analysed form.
     foreach ($items as $item) {
         $itemobj = feedback_get_item_class($item->typ);

@@ -77,6 +77,11 @@ $PAGE->activityheader->set_attrs([
     "description" => ''
 ]);
 echo $OUTPUT->header();
+// JPC: Notify the user that the feedback is locked.
+$feedbackstructure = new mod_feedback_structure($feedback, $cm);
+if ($feedbackstructure->is_locked()) {
+    echo $OUTPUT->notification(get_string('feedbacklocked', 'feedback'), \core\output\notification::NOTIFY_INFO);
+}
 if (!$mode) {
     echo $renderer->main_action_bar($actionbar);
 }
