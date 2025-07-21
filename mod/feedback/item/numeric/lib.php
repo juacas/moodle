@@ -134,8 +134,9 @@ class feedback_item_numeric extends feedback_item_base {
         if (!isset($value->value)) {
             return '';
         }
-
-        return $value->value;
+        // JPC: 2023-07-10 patch for decimal character.
+        return str_replace('.', ',', $value->value);
+        // return $value->value;
     }
 
     public function print_analysed($item, $itemnr = '', $groupid = false, $courseid = false) {

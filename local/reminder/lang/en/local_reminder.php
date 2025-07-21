@@ -26,7 +26,7 @@
 $string['pluginname'] = 'Feedback Reminder';
 $string['remindermessage'] = '<p>There is an important upcoming deadline in the "{$a->coursefullname}" Scheme: </p>' .
 '<p>The deadline is: {$a->eventstart}. Please check that you have completed your tasks.</p>' .
-'<p>(This message is an automatic reminder. If you have already made your delivery you can ignore this prompt.)</p>' .
+'<p>(This message is an automatic reminder. If you have already recorded your results you can ignore this prompt.)</p>' .
 '<h3>{$a->eventname}</h3>' . 
 '<p>{$a->description}</p>' .
 '<a href="{$a->url}"><b>Click here to go to the form</b></a>' .

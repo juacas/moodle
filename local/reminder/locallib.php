@@ -12,7 +12,7 @@ function local_reminder_sendReminders()
 {
 global $CFG, $DB;
 $timeformat="%A %d %B %Y a las %T";
-$prev=48*3600; // 48 hours
+$prev=72*3600; // 72 hours
 
 //$cond= '((eventtype="close" AND modulename="feedback") OR (eventtype="due" AND modulename="assignment")) ';
 $now = time();
@@ -26,7 +26,7 @@ $next_events_timestamp=$now+$prev;
 $cond= ' (eventtype="close" AND modulename="feedback") ';
 $select="$cond" . "AND (timestart<=$next_events_timestamp AND timestart>$lastReminder) ORDER BY timestart ASC";
 
-mtrace("Searching events from ".usertime($lastReminder, $timeformat)." to ".usertime($next_events_timestamp, $timeformat));
+mtrace("Searching events from ".userdate($lastReminder, $timeformat)." to ".userdate($next_events_timestamp, $timeformat));
 mtrace("query:$select");
 
 $events = $DB->get_records_select('event',$select);

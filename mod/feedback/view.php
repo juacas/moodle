@@ -146,6 +146,8 @@ if ($feedbackcompletion->can_complete()) {
         echo $OUTPUT->notification(get_string('this_feedback_is_already_submitted', 'feedback'));
         $OUTPUT->continue_button(course_get_url($courseid ?: $course->id));
     }
+    // JPC: Printing
+    echo "<a href=\"show_user_entries.php?id=$cm->id\">View reported data.</a>";
     echo $OUTPUT->box_end();
 }
 
