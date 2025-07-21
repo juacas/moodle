@@ -73,7 +73,20 @@ class login_signup_form extends moodleform implements renderable, templatable {
             }
             $mform->addRule($field, get_string($stringid), 'required', null, 'client');
         }
+       // JPC: Extra fields.
+       $mform->addElement('text', 'institution', get_string('institution'), 'maxlength="20" size="20"');
+       $mform->setType('institution', PARAM_TEXT);
+       $mform->addRule('institution', get_string('missinginstitution'), 'required', null, 'server');
 
+       $mform->addElement('text', 'department', get_string('department'), 'maxlength="20" size="20"');
+       $mform->setType('department', PARAM_TEXT);
+       $mform->addRule('department', get_string('missingdepartment'), 'required', null, 'server');
+
+       $mform->addElement('text', 'address', get_string('address'), 'maxlength="100" size="100"');
+       $mform->setType('address', PARAM_TEXT);
+       $mform->addRule('address', get_string('missingaddress'), 'required', null, 'server');
+
+       // JPC: End extra fields.
         $mform->addElement('text', 'city', get_string('city'), 'maxlength="120" size="20"');
         $mform->setType('city', core_user::get_property_type('city'));
         if (!empty($CFG->defaultcity)) {
