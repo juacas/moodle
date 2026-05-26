@@ -1,130 +1,476 @@
-﻿<html xmlns="http://www.w3.org/TR/REC-html40" xml:lang="es-es">
-
+﻿<!DOCTYPE html>
+<html lang="es">
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=unicode">
-<meta name=ProgId content=Word.Document>
-<link href="ihavecookies.css" rel="stylesheet">
-<script async src="https://www.googletagmanager.com/gtag/js?id=UA-134528134-1"></script>
-<script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js"></script>
-<script type="text/javascript" src="jquery.ihavecookies.js"></script>
-<script src="installGA_GECLID.js"></script>
-<script src="LPDcheck.js"></script>
-    <script type="text/javascript">
-    $(document).ready(function() {
-        $('#ihavecookiesBtn').on('click', function(){
-            $('body').ihavecookies(ihavecookiesoptions, 'reinit');
-        });
-    });
-    </script>
-<link rel=File-List href="LPD_Cookies_archivos/filelist.xml">
-<title>Política de Cookies</title>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<title>Política de Cookies | GECLID</title>
+	<meta name="description" content="Política de cookies de GECLID con información sobre tipos de cookies, configuración y conservación.">
+	<link rel="preconnect" href="https://fonts.googleapis.com">
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+	<link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&family=Quicksand:wght@500;700&display=swap" rel="stylesheet">
+	<style>
+		:root {
+			--brand-blue: #363739;
+			--brand-blue-dark: #0b2f73;
+			--brand-blue-soft: #486bab;
+			--brand-rose: #dc6aa4;
+			--brand-gold: #f7bf29;
+			--ink: #24324a;
+			--ink-soft: #5e6c84;
+			--surface: #ffffff;
+			--surface-alt: #f2f5fb;
+			--line: rgba(15, 71, 173, 0.12);
+			--shadow: 0 20px 45px rgba(15, 71, 173, 0.12);
+			--radius-lg: 24px;
+			--radius-md: 18px;
+			--radius-sm: 12px;
+		}
 
-<meta name=author content=Marta>
+		* {
+			box-sizing: border-box;
+		}
 
+		body {
+			margin: 0;
+			font-family: 'Open Sans', sans-serif;
+			color: var(--ink);
+			background:
+				radial-gradient(circle at top right, rgba(220, 106, 164, 0.16), transparent 24%),
+				linear-gradient(180deg, #f7f9ff 0%, #eef3fb 100%);
+		}
+
+		a {
+			color: var(--brand-blue);
+			text-decoration: none;
+		}
+
+		a:hover,
+		a:focus {
+			text-decoration: underline;
+		}
+
+		.page-shell {
+			min-height: 100vh;
+		}
+
+		.hero {
+			position: relative;
+			overflow: hidden;
+			padding: 72px 24px 56px;
+			background: linear-gradient(135deg, var(--brand-blue-dark) 0%, var(--brand-blue) 58%, var(--brand-blue-soft) 100%);
+			color: #fff;
+		}
+
+		.hero::after {
+			content: "";
+			position: absolute;
+			inset: auto -80px -120px auto;
+			width: 320px;
+			height: 320px;
+			border-radius: 50%;
+			background: radial-gradient(circle, rgba(247, 191, 41, 0.28) 0%, rgba(247, 191, 41, 0) 72%);
+			pointer-events: none;
+		}
+
+		.container {
+			width: min(1100px, calc(100% - 32px));
+			margin: 0 auto;
+		}
+
+		.eyebrow {
+			display: inline-flex;
+			align-items: center;
+			gap: 10px;
+			padding: 8px 14px;
+			border: 1px solid rgba(255, 255, 255, 0.2);
+			border-radius: 999px;
+			background: rgba(255, 255, 255, 0.08);
+			font-size: 0.88rem;
+			letter-spacing: 0.04em;
+			text-transform: uppercase;
+		}
+
+		.hero h1 {
+			margin: 18px 0 14px;
+			font-family: 'Quicksand', sans-serif;
+			font-size: clamp(2.3rem, 4vw, 3.8rem);
+			line-height: 1.05;
+		}
+
+		.hero p {
+			max-width: 760px;
+			margin: 0;
+			font-size: 1.05rem;
+			line-height: 1.8;
+			color: rgba(255, 255, 255, 0.92);
+		}
+
+		.hero-actions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 14px;
+			margin-top: 28px;
+		}
+
+		.button {
+			display: inline-flex;
+			align-items: center;
+			justify-content: center;
+			padding: 13px 22px;
+			border-radius: 999px;
+			border: 1px solid transparent;
+			font-weight: 700;
+			transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease;
+		}
+
+		.button:hover,
+		.button:focus {
+			transform: translateY(-1px);
+			box-shadow: 0 14px 28px rgba(11, 47, 115, 0.22);
+			text-decoration: none;
+		}
+
+		.button-primary {
+			background: #fff;
+			color: var(--brand-blue-dark);
+		}
+
+		.button-secondary {
+			background: rgba(255, 255, 255, 0.08);
+			border-color: rgba(255, 255, 255, 0.2);
+			color: #fff;
+		}
+
+		main {
+			position: relative;
+			margin-top: -28px;
+			padding: 0 0 72px;
+		}
+
+		.grid {
+			display: grid;
+			grid-template-columns: minmax(0, 1.45fr) minmax(280px, 0.9fr);
+			gap: 24px;
+			align-items: start;
+		}
+
+		.card {
+			background: var(--surface);
+			border: 1px solid var(--line);
+			border-radius: var(--radius-lg);
+			box-shadow: var(--shadow);
+			padding: 32px;
+		}
+
+		.card + .card {
+			margin-top: 24px;
+		}
+
+		.section-title {
+			margin: 0 0 16px;
+			font-family: 'Quicksand', sans-serif;
+			font-size: 1.55rem;
+			color: var(--brand-blue-dark);
+		}
+
+		.lead {
+			color: var(--ink-soft);
+			line-height: 1.8;
+			margin: 0;
+		}
+
+		.cookie-list,
+		.browser-list {
+			margin: 18px 0 0;
+			padding-left: 20px;
+		}
+
+		.cookie-list li,
+		.browser-list li {
+			margin-bottom: 14px;
+			line-height: 1.75;
+		}
+
+		.browser-list strong,
+		.cookie-list strong {
+			color: var(--brand-blue-dark);
+		}
+
+		.aside-panel {
+			position: sticky;
+			top: 24px;
+		}
+
+		.mini-card {
+			padding: 26px;
+			border-radius: var(--radius-md);
+			background: linear-gradient(180deg, rgba(72, 107, 171, 0.08), rgba(15, 71, 173, 0.04));
+			border: 1px solid rgba(15, 71, 173, 0.12);
+		}
+
+		.mini-card + .mini-card {
+			margin-top: 18px;
+		}
+
+		.mini-card h3 {
+			margin: 0 0 12px;
+			font-family: 'Quicksand', sans-serif;
+			font-size: 1.15rem;
+			color: var(--brand-blue-dark);
+		}
+
+		.mini-card p,
+		.mini-card li {
+			margin: 0;
+			color: var(--ink-soft);
+			line-height: 1.7;
+		}
+
+		.mini-card ul {
+			margin: 0;
+			padding-left: 18px;
+		}
+
+		.highlight-box {
+			display: grid;
+			gap: 14px;
+			margin-top: 22px;
+			padding: 22px;
+			border-radius: var(--radius-md);
+			background: var(--surface-alt);
+			border: 1px solid rgba(72, 107, 171, 0.12);
+		}
+
+		.highlight-box strong {
+			color: var(--brand-blue-dark);
+		}
+
+		.table-wrap {
+			overflow-x: auto;
+			margin-top: 22px;
+			border: 1px solid var(--line);
+			border-radius: var(--radius-md);
+		}
+
+		table {
+			width: 100%;
+			border-collapse: collapse;
+			background: #fff;
+		}
+
+		thead {
+			background: linear-gradient(90deg, rgba(15, 71, 173, 0.95), rgba(72, 107, 171, 0.95));
+			color: #fff;
+		}
+
+		th,
+		td {
+			padding: 16px 18px;
+			text-align: left;
+			vertical-align: top;
+			border-bottom: 1px solid rgba(15, 71, 173, 0.08);
+			line-height: 1.65;
+		}
+
+		tbody tr:nth-child(even) {
+			background: rgba(242, 245, 251, 0.75);
+		}
+
+		footer {
+			padding: 28px 24px 48px;
+			color: var(--ink-soft);
+			text-align: center;
+			font-size: 0.95rem;
+		}
+
+		@media (max-width: 920px) {
+			.grid {
+				grid-template-columns: 1fr;
+			}
+
+			.aside-panel {
+				position: static;
+			}
+		}
+
+		@media (max-width: 640px) {
+			.hero {
+				padding-top: 56px;
+			}
+
+			.card {
+				padding: 24px;
+			}
+
+			.hero-actions {
+				flex-direction: column;
+			}
+
+			.button {
+				width: 100%;
+			}
+		}
+	</style>
 </head>
+<body>
+	<div class="page-shell">
+		<header class="hero">
+			<div class="container">
+				<div class="eyebrow">GECLID · Política de Cookies</div>
+				<h1>Información clara sobre las cookies que utilizamos</h1>
+				<p>
+					Este sitio usa cookies técnicas y de análisis para mantener el acceso al sistema,
+					recordar sus preferencias y comprender el uso de la plataforma. En esta página puede
+					consultar qué cookies empleamos, cómo gestionarlas y qué ocurre si decide rechazarlas.
+				</p>
+				<div class="hero-actions">
+					<a class="button button-primary" href="./">Volver a GECLID</a>
+					<a class="button button-secondary" href="#configuracion">Cómo configurar las cookies</a>
+				</div>
+			</div>
+		</header>
 
-<body lang=ES link=blue vlink=purple style='tab-interval:35.4pt'>
+		<main>
+			<div class="container grid">
+				<section>
+					<article class="card">
+						<h2 class="section-title">¿Qué son las cookies?</h2>
+						<p class="lead">
+							Una cookie es un pequeño archivo que se descarga en su dispositivo cuando visita una web.
+							Permite almacenar y recuperar información sobre la navegación para prestar servicios,
+							mantener la sesión activa o elaborar estadísticas de uso.
+						</p>
+						<div class="highlight-box">
+							<div><strong>Base funcional:</strong> las cookies técnicas son necesarias para que Moodle y los servicios de acceso funcionen correctamente.</div>
+							<div><strong>Base analítica:</strong> las cookies de medición solo se activan cuando usted las acepta expresamente.</div>
+						</div>
+					</article>
 
-<div class=WordSection1>
+					<article class="card" id="configuracion">
+						<h2 class="section-title">¿Cómo puede configurar sus cookies?</h2>
+						<p class="lead">
+							Puede aceptar, rechazar o personalizar las cookies desde el banner de consentimiento del sitio.
+							También puede modificar su decisión en cualquier momento desde Preferencias de Cookies o desde la configuración de su navegador.
+						</p>
+						<ol class="browser-list">
+							<li><strong>Internet Explorer:</strong> Herramientas &gt; Opciones de Internet &gt; Privacidad &gt; Configuración.</li>
+							<li><strong>Firefox:</strong> Herramientas &gt; Opciones &gt; Privacidad &gt; Historial &gt; Configuración personalizada.</li>
+							<li><strong>Chrome:</strong> Configuración &gt; Privacidad y seguridad &gt; Configuración de sitios.</li>
+							<li><strong>Safari:</strong> Preferencias &gt; Seguridad o Privacidad, según la versión utilizada.</li>
+							<li><strong>Opera:</strong> Configuración &gt; Privacidad y seguridad &gt; Cookies y otros datos del sitio.</li>
+						</ol>
+					</article>
 
-<h1><span style='mso-fareast-font-family:"Times New Roman"'>Aviso legal –
-Condiciones Generales de Uso<o:p></o:p></span></h1>
+					<article class="card">
+						<h2 class="section-title">¿Qué ocurre si se deshabilitan?</h2>
+						<p class="lead">
+							Si bloquea o elimina determinadas cookies, algunas funcionalidades de GECLID pueden dejar de estar disponibles o no comportarse correctamente.
+							En especial, el acceso autenticado, la persistencia de sesión y determinadas preferencias de navegación dependen de cookies técnicas.
+						</p>
+					</article>
 
-<p><o:p>&nbsp;</o:p></p>
+					<article class="card">
+						<h2 class="section-title">¿Qué cookies usamos?</h2>
+						<p class="lead">
+							A continuación se resume la finalidad principal de las cookies utilizadas actualmente en el sitio.
+						</p>
+						<div class="table-wrap">
+							<table>
+								<thead>
+									<tr>
+										<th>Cookie</th>
+										<th>Tipo</th>
+										<th>Finalidad</th>
+										<th>Duración orientativa</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<td>cookieControl</td>
+										<td>Técnica</td>
+										<td>Recuerda si ya ha gestionado el banner de cookies para no mostrarlo de nuevo en cada visita.</td>
+										<td>30 días</td>
+									</tr>
+									<tr>
+										<td>cookieControlPrefs</td>
+										<td>Técnica</td>
+										<td>Almacena sus preferencias de consentimiento sobre cookies no esenciales.</td>
+										<td>365 días</td>
+									</tr>
+									<tr>
+										<td>MOODLEID_geclid, MoodleSessiongeclid, MoodleSessionTestgeclid</td>
+										<td>Técnica</td>
+										<td>Permiten iniciar sesión, mantener la autenticación y asegurar el funcionamiento de GECLID.</td>
+										<td>Sesión</td>
+									</tr>
+									<tr>
+										<td>_ga</td>
+										<td>Analítica</td>
+										<td>Google Analytics la utiliza para distinguir usuarios y medir visitas únicas.</td>
+										<td>Hasta 2 años</td>
+									</tr>
+									<tr>
+										<td>_gat</td>
+										<td>Analítica</td>
+										<td>Se usa para limitar la tasa de peticiones en sitios con tráfico elevado.</td>
+										<td>10 minutos</td>
+									</tr>
+									<tr>
+										<td>_gid</td>
+										<td>Analítica</td>
+										<td>Ayuda a diferenciar usuarios y elaborar estadísticas agregadas de uso.</td>
+										<td>24 horas</td>
+									</tr>
+								</tbody>
+							</table>
+						</div>
+						<ul class="cookie-list">
+							<li>Puede consultar más información sobre el tratamiento realizado por Google Analytics en <a href="https://www.google.com/intl/es_ALL/analytics/learn/privacy.html" target="_blank" rel="noopener noreferrer">su política de privacidad</a>.</li>
+							<li>Las cookies analíticas solo se instalan si usted presta su consentimiento.</li>
+						</ul>
+					</article>
 
-<p>Este sitio utiliza cookies técnicas y analíticas. A continuación, encontrará
-información detallada sobre qué son las “Cookies”, qué tipología utiliza este
-sitio web, cómo cambiar la configuración de sus cookies, y qué ocurre si deshabilita
-las Cookies.<o:p></o:p></p>
+					<article class="card">
+						<h2 class="section-title">Actualizaciones de esta política</h2>
+						<p class="lead">
+							Podemos revisar esta Política de Cookies para adaptarla a cambios normativos, técnicos o funcionales del sitio web.
+							Le recomendamos consultarla periódicamente para mantenerse informado sobre cómo y para qué utilizamos cookies.
+						</p>
+					</article>
+				</section>
 
-<h2>¿Qué son las cookies?<o:p></o:p></h2>
+				<aside class="aside-panel">
+					<div class="mini-card">
+						<h3>Gestión rápida</h3>
+						<p>
+							Puede volver a abrir el panel de cookies desde el enlace Preferencias de Cookies del pie de la web para cambiar su consentimiento en cualquier momento.
+						</p>
+					</div>
 
-<p>Una cookie es un pequeño archivo que se descarga en el equipo del usuario
-con la finalidad de almacenar datos, los cuales podrán ser actualizados y
-recuperados por la entidad responsable de su instalación.</p>
+					<div class="mini-card">
+						<h3>Resumen</h3>
+						<ul>
+							<li>Las cookies técnicas son imprescindibles para acceder y navegar.</li>
+							<li>Las cookies analíticas son opcionales y se pueden rechazar.</li>
+							<li>Su preferencia queda guardada para futuras visitas.</li>
+						</ul>
+					</div>
 
-<h2>¿Cómo puede configurar sus Cookies?<o:p></o:p></h2>
+					<div class="mini-card">
+						<h3>Contacto</h3>
+						<p>
+							Programa GECLID<br>
+							Centro de Hemoterapia y Hemodonación de Castilla y León<br>
+							Paseo de Filipinos s/n, 47007 Valladolid
+						</p>
+					</div>
+				</aside>
+			</div>
+		</main>
 
-<p>Al navegar y continuar en nuestro sitio web estará consintiendo el uso de
-las Cookies en las condiciones contenidas en la presente Política de Cookies.
-Usted como usuario tiene la posibilidad de ejercer su derecho a bloquear, eliminar
-y rechazar el uso de Cookies, en todo momento, accediendo a la Configuración de
-Cookies, o modificando las opciones de su navegador.<o:p></o:p></p>
-
-<p>Por ejemplo: </p>
-
-<p style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3'><![if !supportLists]><span
-style='mso-fareast-font-family:"Trebuchet MS";mso-bidi-font-family:"Trebuchet MS"'><span
-style='mso-list:Ignore'>1.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Internet Explorer: Herramientas &gt; Opciones de
-Internet &gt; Privacidad &gt; Configuración. Para más información, puede
-consultar el soporte de Microsoft o la Ayuda del navegador.</p>
-
-<p style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3'><![if !supportLists]><span
-style='mso-fareast-font-family:"Trebuchet MS";mso-bidi-font-family:"Trebuchet MS"'><span
-style='mso-list:Ignore'>2.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Firefox: Herramientas &gt; Opciones &gt;
-Privacidad &gt; Historial &gt; Configuración Personalizada. Para más
-información, puede consultar el soporte de Mozilla o la Ayuda del navegador.</p>
-
-<p style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3'><![if !supportLists]><span
-style='mso-fareast-font-family:"Trebuchet MS";mso-bidi-font-family:"Trebuchet MS"'><span
-style='mso-list:Ignore'>3.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Chrome: Configuración &gt; Mostrar opciones
-avanzadas &gt; Privacidad -&gt; Configuración de contenido. Para más
-información, puede consultar el soporte de Google o la Ayuda del navegador.</p>
-
-<p style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3'><![if !supportLists]><span
-style='mso-fareast-font-family:"Trebuchet MS";mso-bidi-font-family:"Trebuchet MS"'><span
-style='mso-list:Ignore'>4.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Safari: Preferencias &gt; Seguridad. Para más
-información, puede consultar el soporte de Apple o la Ayuda del navegador.</p>
-
-<p style='margin-left:36.0pt;text-indent:-18.0pt;mso-list:l2 level1 lfo3'><![if !supportLists]><span
-style='mso-fareast-font-family:"Trebuchet MS";mso-bidi-font-family:"Trebuchet MS"'><span
-style='mso-list:Ignore'>5.<span style='font:7.0pt "Times New Roman"'>&nbsp;&nbsp;&nbsp;
-</span></span></span><![endif]>Opera: Configuración &gt; Opciones &gt; Avanzado
-&gt; Cookies Para más información, puede consultar el soporte de Opera o la
-Ayuda del navegador. Si usa otro navegador distinto a los anteriores, consulte
-su política de instalación, uso y bloqueo de cookies.</p>
-
-<h2><span style='mso-spacerun:yes'> </span>¿Qué ocurre si se deshabilitan las
-Cookies?</h2>
-
-<p style='margin-left:18.0pt'>Algunas funcionalidades de los Servicios y áreas
-de este sitio web podrían no funcionar correctamente si se deshabilitan las
-cookies. </p>
-<h2>¿Qué Cookies usamos?</h2>
-<ul>
-<li>cookieControl: Para recordar si ha aceptado las Cookies y no volver a preguntarle.</li>
-<li>cookieControlPrefs: Para recordar si ha aceptado las Cookies no esenciales.</li>
-<li>MOODLEID_geclid, MoodleSessiongeclid, MoodleSessionTestgeclid: para permitirle entrar en el sistema con su usuario y password. Es estrictamente necesaria.</li>
-<li>_ga: cookie de Google Analytics que habilita la función de control de visitas únicas. La primera vez que un usuario entre en el sitio web a través de un navegador se instalará esta cookie. Cuando este usuario vuelva a
-entrar en la web con el mismo navegador, la cookie considerará que es el mismo usuario. Solo en el caso de que el usuario cambie de navegador, se considerará otro usuario. Caduca a los 2 años desde la última actualización. 
-Más información del tratamiento realizado por Google Analytics <a href="https://www.google.com/intl/es_ALL/analytics/learn/privacy.html">aquí</a>.</li>
-<li>_gat: Esta cookie se asocia con Google Analytics. Se utiliza para limitar la velocidad de petición - la limitación
-de la recogida de datos en los sitios de alto tráfico. Caduca a los 10 minutos.</li>
-<li>_gid: Esta cookie se asocia con Google Analytics. Se utiliza para distinguir a los usuarios. Caduca a las 24 horas.</li>
-</ul>
-
-<h2>¿Actualizamos nuestra Política de Cookies?</h2>
-
-<p style='margin-left:18.0pt'>Es posible que actualicemos la Política de
-Cookies de nuestra página web, por ello le recomendamos revisar esta política
-cada vez que acceda a nuestro sitio web con el objetivo de estar adecuadamente
-informado sobre cómo y para qué usamos las cookies.</p>
-
-<p style='margin-left:18.0pt'><o:p><button id="ihavecookiesBtn">Modifica la elección de Cookies</button></o:p></p>
-
-<p style='margin-left:18.0pt'><o:p>&nbsp;</o:p></p>
-
-<p align=center style='text-align:center'>© Copyright 2019 <b>FUNDACIÓN DE
-HEMOTERAPIA Y HEMODONACIÓN DE CASTILLA Y LEÓN </b>- Todos los</p>
-
-<p align=center style='text-align:center'>derechos reservados.</p>
-
-</div>
-
+		<footer>
+			© GECLID · Fundación de Hemoterapia y Hemodonación de Castilla y León. Todos los derechos reservados.
+		</footer>
+	</div>
 </body>
-
 </html>
